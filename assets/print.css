@@ -1,0 +1,38 @@
+@media print {
+    .just-a-button,
+    .no-print,
+    .dcc-upload,
+    #tabs-parent,
+    .input-style {
+        display: none; 
+    }
+    .print-header {
+        display: grid;
+        place-items: center;
+        background: white;
+        text-align: center !important;
+        padding: 45px;
+        color: black;
+        font-size: 20px;
+        font-style: italic;
+    }
+    .graph-col {
+        display: grid;
+        place-items: center;
+        margin-left: 20px;
+        margin-right: 20px;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+    .met-class-style,
+    .met-name-style {
+        color: rgb(0, 0, 0);
+        text-align: center;
+    }
+    .met-class-style {
+        margin: 20px; 
+    }
+    .met-name-style {
+        margin: 10px;
+    }
+}
