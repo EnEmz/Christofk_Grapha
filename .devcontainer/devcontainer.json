@@ -1,6 +1,6 @@
 {
     "name": "Python 3.12.0 Environment",
-    "dockerFile": "Dockerfile",
+    "dockerFile": ".devcontainer/Dockerfile",
     "settings": { 
         "terminal.integrated.shell.linux": "/bin/bash",
         "python.linting.enabled": true,
