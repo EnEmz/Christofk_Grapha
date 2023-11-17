@@ -1,13 +1,21 @@
 # config.py
 
 import pandas as pd
+import os
 
 from layout.utilities_layout import generate_classes_checklist_options_with_met_names
 
+# Get the current working directory
+current_directory = os.getcwd()
+
+# Filename of the metabolite classes file
+filename = "metabolite_classes.csv"
+
+# Construct the full path to metabolite classes file
+path_met_pathway_list = os.path.join(current_directory, filename)
+
 # Insert your preselected options for the normalization of the pool data
 normalization_preselected = ['trifluoromethanesulfonate', 'quantity/sample']
-
-path_met_pathway_list = '/Users/nedas/Documents/Python/analyte_classes_philic.csv'
 
 df_met_group_list = pd.read_csv(path_met_pathway_list)
 df_met_group_list = df_met_group_list.drop_duplicates(keep='first').dropna(how='all')
