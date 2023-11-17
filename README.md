@@ -22,6 +22,8 @@ The app automatically detects the presence of isotopologue data based on the "No
 
 1. **Run the App**:
    - Execute `index.py` to start the application.
+   - In your terminal, Flask will start a local server on your computer and give a message that 'Dash app is running on: `http://127.0.0.1:8050/`'. Copy the http address `http://127.0.0.1:8050/` (or whatever is in your terminal) and paste it in your web browser.
+   - You should be able to see Christofk_Grapha app.
 
 2. **Upload Data**:
    - Upload data from the `Example Data` folder.

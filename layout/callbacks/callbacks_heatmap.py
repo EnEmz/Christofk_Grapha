@@ -224,6 +224,31 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
     prevent_initial_call = True
 )
 def display_bulk_isotopologue_heatmap_plot(n_clicks, iso_data, met_classes, met_groups, settings):
+    '''
+    Display the heatmap plot of isotopologue data if it is available in the uploaded data
+    based on user-selected parameters and provided data. 
+    The function also stores a JSON representation of the plot for later use.
+    
+    Parameters:
+    ----------
+    n_clicks : int
+        Number of times the 'Generate Heatmap Plot' button is clicked.
+    iso_data : dict
+        Isotopologue data from uploaded file.
+    met_classes : dict
+        Selected metabolic classes for the bulk heatmap.
+    met_groups : dict
+        Grouping of data.
+    settings: dict
+        Selected or placeholder settings for the bulk heatmap
+        
+    Returns:
+    -------
+    list
+        A list of HTML Divs containing heatmap plots.
+    json
+        JSON representation of the created heatmap plots.
+    '''
     
     ctx = callback_context
     

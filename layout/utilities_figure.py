@@ -211,7 +211,7 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_presen
         symbol = "p < 0.0001"
     return symbol
 
-
+# Adapted from https://stackoverflow.com/questions/67505252/plotly-box-p-value-significant-annotation
 def add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings, y_range, adjusted_text_offset, color='black'):
     '''
     Adds line shapes and text annotations for displaying p-values on a given Plotly figure.
@@ -271,7 +271,6 @@ def add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings,
     ))
 
 
-# Adapted from https://stackoverflow.com/questions/67505252/plotly-box-p-value-significant-annotation
 def add_p_value_annotations_pool(fig, array_columns, numerical_present, settings, color='black'):
     ''' 
     Adds p-value annotations to the metabolomics pool data represented as a box plot
@@ -427,7 +426,6 @@ def generate_single_met_iso_figure(df_metabolite, grouped_samples, settings):
     return fig
     
 
-    
 def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_columns, numerical_present, settings, color='black'):
     ''' 
     Adds p-value annotations to the metabolomics isotopologue stacked bar plot based on comparisons
@@ -581,6 +579,27 @@ def group_met_pool_data(df, selected_met_classes):
 
 
 def generate_volcano_plot(df_volcano, FC_cutoff, third_pvalue_cutoff, second_pvalue_cutoff, first_pvalue_cutoff, settings, search_value=None):
+    """
+    Generate an interactive volcano plot using Plotly.
+
+    This function creates a scatter plot to visualize metabolomics data. The plot displays log2 fold change 
+    on the x-axis and -log10 p-value on the y-axis. It includes customizable visual aspects such as data point size, 
+    background color, and font settings. It also features the ability to highlight a selected metabolite and 
+    add horizontal and vertical lines to mark significant thresholds.
+
+    Parameters:
+    - df_volcano (DataFrame): A pandas DataFrame containing the columns 'log2FC', 'logp-value', 'color', and 'MetNames'.
+    - FC_cutoff (float): The fold change cutoff for significance, used to draw vertical lines on the plot.
+    - third_pvalue_cutoff (float): The -log10 p-value cutoff for *** significance level.
+    - second_pvalue_cutoff (float): The -log10 p-value cutoff for ** significance level.
+    - first_pvalue_cutoff (float): The -log10 p-value cutoff for * significance level.
+    - settings (dict): A dictionary containing plot settings such as datapoint size, background color, font settings, etc.
+    - search_value (str, optional): The name of a metabolite to highlight. If provided, the function highlights this metabolite.
+
+    Returns:
+    - fig (go.Figure): A Plotly graph object figure containing the volcano plot.
+    """
+    
     fig = go.Figure()
     
     # Defining plot and axis titles
@@ -1050,6 +1069,23 @@ def generate_individual_heatmap(pathway_df, grouped_samples, settings, group_sig
 
 
 def calculate_heatmap_group_middle_points(grouped_samples, include_first_gap, include_group_gaps, gap_width):
+    """
+    Calculate the middle points of sample groups for a heatmap.
+
+    This function computes the middle points of each group in a set of grouped samples, typically used 
+    for aligning labels or annotations in a heatmap. It accounts for gaps between groups and optionally 
+    an initial gap before the first group.
+
+    Parameters:
+    - grouped_samples (dict): A dictionary where keys are group names and values are lists of sample columns belonging to each group.
+    - include_first_gap (bool): If True, includes a gap before the first group.
+    - include_group_gaps (bool): If True, includes gaps between each group of samples.
+    - gap_width (int): The width of the gaps between groups (and before the first group if include_first_gap is True).
+
+    Returns:
+    - middle_points (dict): A dictionary where keys are the group names and values are the calculated middle points of each group.
+    """
+  
     middle_points = {}
     current_position = 0
 
@@ -1328,7 +1364,6 @@ def generate_group_significance(df_pool, grouped_samples):
     return significant_results
 
 
-
 def calculate_offsets_for_volcano_annotations(new_point, stored_points, standoff=4, font_size=12, max_trials=100):
     """
     Calculate the annotation position offsets for a new point on a volcano plot to avoid overlapping other annotations.
@@ -1385,8 +1420,22 @@ def calculate_offsets_for_volcano_annotations(new_point, stored_points, standoff
 
 
 def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, settings):
-    
-    
+    """
+    Generate a bar chart figure representing isotopologue distribution for metabolite data.
+
+    This function creates a grouped bar chart to display the distribution of isotopologues across different 
+    sample groups. Each isotopologue's average percentage composition within each sample group is plotted as 
+    a bar, with error bars representing standard deviation. The function also skips isotopologues that have 
+    zero values across all sample groups.
+
+    Parameters:
+    - df_iso_met (DataFrame): A pandas DataFrame containing isotopologue data with columns 'C_Label' and sample identifiers.
+    - grouped_samples (dict): A dictionary where keys are group names and values are lists of sample columns belonging to each group.
+    - settings (dict): A dictionary containing plot settings such as bar width, bar gap, plot dimensions, etc.
+
+    Returns:
+    - fig (go.Figure): A Plotly graph object figure containing the isotopologue distribution bar chart.
+    """
     
     fig = go.Figure()  # Create a new plotly figure
     
@@ -1465,7 +1514,27 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
 
 
 def add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, array_columns, numerical_present, settings, color='black'):
-    
+    """
+    Add p-value annotations to an isotopologue distribution figure.
+
+    This function annotates a Plotly figure representing isotopologue distribution with p-values. It compares 
+    isotopologue data between different sample groups and adds statistical significance annotations. The function 
+    filters out rows where all values are zero, calculates p-values for pairs of sample groups, and adds 
+    corresponding annotations to the figure.
+
+    Parameters:
+    - fig (go.Figure): The Plotly graph object figure to which the annotations will be added.
+    - df_iso_met (DataFrame): A pandas DataFrame containing isotopologue data with columns 'C_Label' and sample identifiers.
+    - grouped_samples (dict): A dictionary where keys are group names and values are lists of sample columns belonging to each group.
+    - array_columns (list of tuples): List of tuples where each tuple contains indices of two groups to be compared for p-value calculation.
+    - numerical_present (bool): Indicator of whether numerical data is present.
+    - settings (dict): A dictionary containing plot settings such as annotation positions, text offset, etc.
+    - color (str, optional): Color of the p-value annotation text. Default is 'black'.
+
+    Returns:
+    - fig (go.Figure): The modified Plotly graph object figure with added p-value annotations.
+    """
+        
     # Get all columns from grouped_samples
     all_grouped_columns = [col for group in grouped_samples.values() for col in group]
     # Filter out rows where all values are zero in grouped_samples columns

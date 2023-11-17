@@ -1190,7 +1190,28 @@ def store_settings_isotopologue_distribution(n_clicks,
     prevent_initial_call = True
 )
 def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomics, volcano, met_normalization):
-    
+    """
+    Callback function to display selected normalization methods for various plots in a Dash application.
+
+    This function is triggered by the click of any of the four specified buttons in a Dash app. It checks 
+    which button was clicked and displays the selected normalization methods for the corresponding plot. 
+    The function also handles cases where no normalization methods are selected or when the metadata is not provided.
+
+    Parameters:
+    - bulk_heatmap (int): Number of clicks on the 'generate-bulk-heatmap-plot' button.
+    - custom_heatmap (int): Number of clicks on the 'generate-custom-heatmap-plot' button.
+    - bulk_metabolomics (int): Number of clicks on the 'generate-metabolomics' button.
+    - volcano (int): Number of clicks on the 'generate-volcano-plot' button.
+    - met_normalization (dict): A dictionary containing the 'selected_values' key with a list of selected normalization methods.
+
+    Returns:
+    - Tuple of Dash components: Each element of the tuple corresponds to the content to be displayed in the 
+      respective 'normalization-display-container-*' component. Only the component corresponding to the clicked 
+      button is updated with the selected normalization methods, while others are set to a default empty display.
+
+    Raises:
+    - PreventUpdate: If no button has been clicked or if no normalization method is selected.
+    """    
     
     ctx = callback_context
     
