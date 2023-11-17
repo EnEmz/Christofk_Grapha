@@ -210,20 +210,20 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
 
 @app.callback(
 [
-    Output('bulk-isotopomer-heatmap-plot-container', 'children'),
-    Output('store-bulk-isotopomer-heatmap-plot', 'data'),
+    Output('bulk-isotopologue-heatmap-plot-container', 'children'),
+    Output('store-bulk-isotopologue-heatmap-plot', 'data'),
     Output('toast-container', 'children', allow_duplicate=True)
 ],
-    Input('generate-bulk-isotopomer-heatmap-plot', 'n_clicks'),
+    Input('generate-bulk-isotopologue-heatmap-plot', 'n_clicks'),
 [
     State('store-data-iso', 'data'),
     State('store-met-classes', 'data'),
     State('store-data-order', 'data'),
-    State('store-bulk-isotopomer-heatmap-settings', 'data')
+    State('store-bulk-isotopologue-heatmap-settings', 'data')
 ],
     prevent_initial_call = True
 )
-def display_bulk_isotopomer_heatmap_plot(n_clicks, iso_data, met_classes, met_groups, settings):
+def display_bulk_isotopologue_heatmap_plot(n_clicks, iso_data, met_classes, met_groups, settings):
     
     ctx = callback_context
     
@@ -236,8 +236,8 @@ def display_bulk_isotopomer_heatmap_plot(n_clicks, iso_data, met_classes, met_gr
     else:
         triggered_id  = ctx.triggered[0]['prop_id'].split('.')[0]
         
-         # Execute the function only if the generate-bulk-isotopomer-heatmap button was clicked
-        if triggered_id  == 'generate-bulk-isotopomer-heatmap-plot' and n_clicks > 0:
+         # Execute the function only if the generate-bulk-isotopologue-heatmap button was clicked
+        if triggered_id  == 'generate-bulk-isotopologue-heatmap-plot' and n_clicks > 0:
             
             if iso_data is None:
                 return no_update, no_update, generate_toast("error", 

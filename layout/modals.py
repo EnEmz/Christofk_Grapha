@@ -16,10 +16,10 @@ def build_modal_components():
     modal_components.append(get_group_modal())
     
     modal_components.append(get_pvalue_modal_bulk_metabolomics())
-    modal_components.append(get_pvalue_modal_isotopomer_distribution())
+    modal_components.append(get_pvalue_modal_isotopologue_distribution())
     
     modal_components.append(get_settings_modal_bulk_heatmap())
-    modal_components.append(get_settings_modal_bulk_isotopomer_heatmap())
+    modal_components.append(get_settings_modal_bulk_isotopologue_heatmap())
     modal_components.append(get_settings_modal_custom_heatmap())
     modal_components.append(get_settings_modal_metabolomics())
     modal_components.append(get_settings_modal_iso_distribution())
@@ -236,18 +236,18 @@ def get_settings_modal_bulk_heatmap():
     
     
 # Bulk heatmap
-def get_settings_modal_bulk_isotopomer_heatmap():
+def get_settings_modal_bulk_isotopologue_heatmap():
     return dbc.Modal(
         children=
                 [
-                    dbc.ModalHeader("Settings for the bulk isotopomer heatmap."),
+                    dbc.ModalHeader("Settings for the bulk Isotopologue heatmap."),
                     dbc.ModalBody([
                         dbc.Row([
                             dbc.Col([
                                 html.Label("Height Modifier"),
                                 # Slider for height of the plots.
                                 dcc.Slider(
-                                    id="bulk-isotopomer-heatmap-height-modifier",
+                                    id="bulk-isotopologue-heatmap-height-modifier",
                                     min=0.1,
                                     max=3,
                                     step=0.1,
@@ -259,7 +259,7 @@ def get_settings_modal_bulk_isotopomer_heatmap():
                                 html.Label("Width Modifier"),
                                 # Slider for the width of the plots.
                                 dcc.Slider(
-                                    id="bulk-isotopomer-heatmap-width-modifier",
+                                    id="bulk-isotopologue-heatmap-width-modifier",
                                     min=0.1,
                                     max=3,
                                     step=0.1,
@@ -273,7 +273,7 @@ def get_settings_modal_bulk_isotopomer_heatmap():
                                 html.Label("Plot Font Style"),
                                 # Selection of the font for all text components in the plots.
                                 dbc.Select(
-                                    id='bulk-isotopomer-heatmap-font-selector',
+                                    id='bulk-isotopologue-heatmap-font-selector',
                                     options=[
                                         {"label": "Arial", "value": "Arial"},
                                         {"label": "Helvetica", "value": "Helvetica"},
@@ -300,7 +300,7 @@ def get_settings_modal_bulk_isotopomer_heatmap():
                                 html.Label("Plot Font Size"),
                                 # Slider for changing the font size for all text elements in the plots.
                                 dcc.Slider(
-                                    id="bulk-isotopomer-heatmap-font-size",
+                                    id="bulk-isotopologue-heatmap-font-size",
                                     min=5,
                                     max=20,
                                     step=1,
@@ -313,18 +313,18 @@ def get_settings_modal_bulk_isotopomer_heatmap():
                             html.Label("Heatmap Colorscale Selection", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label('Unchanged Values'),
-                                dbc.Input(id='bulk-isotopomer-heatmap-unch-val-color', type='color', value='#f8f9fa')
+                                dbc.Input(id='bulk-isotopologue-heatmap-unch-val-color', type='color', value='#f8f9fa')
                             ], className="settings-dbc-col"),
                             dbc.Col([
                                 html.Label('Increased Values'),
-                                dbc.Input(id='bulk-isotopomer-heatmap-inc-val-color', type='color', value='#b30000')
+                                dbc.Input(id='bulk-isotopologue-heatmap-inc-val-color', type='color', value='#b30000')
                             ], className="settings-dbc-col")
                         ], className="settings-dbc-row")
                     ]),
                     dbc.ModalFooter(
-                        dbc.Button("Update", id="update-settings-bulk-isotopomer-heatmap", n_clicks=0, color="success"))
+                        dbc.Button("Update", id="update-settings-bulk-isotopologue-heatmap", n_clicks=0, color="success"))
                 ],
-                id="modal-settings-bulk-isotopomer-heatmap",
+                id="modal-settings-bulk-isotopologue-heatmap",
                 size='xl',
                 is_open=False,
                 backdrop="static"
@@ -431,7 +431,7 @@ def get_settings_modal_custom_heatmap():
             )
     
     
-# Metabolomics (both isotopomer and pool)
+# Metabolomics (both isotopologue and pool)
 def get_settings_modal_metabolomics():
     return dbc.Modal(
                 [
@@ -530,8 +530,8 @@ def get_settings_modal_metabolomics():
                         ], className="settings-dbc-row"),
                         dbc.Row([
                             dbc.Col([
-                                # Container for isotopomer plot specific settings.
-                                html.Label("Isotopomer Specific Plot Settings", className='sample-group-dropdown-label'),
+                                # Container for isotopologue plot specific settings.
+                                html.Label("Isotopologue Specific Plot Settings", className='sample-group-dropdown-label'),
                                 html.Label("Coming soon, work in progress.", className='modal-placeholder-message')
                             ]),
                             dbc.Col([
@@ -613,7 +613,7 @@ def get_settings_modal_metabolomics():
             )
     
 
-# Isotopomer distribution
+# Isotopologue distribution
 def get_settings_modal_iso_distribution():
     return dbc.Modal(
                 [
@@ -624,7 +624,7 @@ def get_settings_modal_iso_distribution():
                                 html.Label("Height"),
                                 # Slider for height of the plots.
                                 dcc.Slider(
-                                    id="isotopomer-distribution-height",
+                                    id="isotopologue-distribution-height",
                                     min=100,
                                     max=1500,
                                     step=50,
@@ -636,7 +636,7 @@ def get_settings_modal_iso_distribution():
                                 html.Label("Width"),
                                 # Slider for the width of the plots.
                                 dcc.Slider(
-                                    id="isotopomer-distribution-width",
+                                    id="isotopologue-distribution-width",
                                     min=100,
                                     max=2000,
                                     step=50,
@@ -650,7 +650,7 @@ def get_settings_modal_iso_distribution():
                                 html.Label("Plot Font Style"),
                                 # Selection of the font for all text components in the plots.
                                 dbc.Select(
-                                    id='isotopomer-distribution-font-selector',
+                                    id='isotopologue-distribution-font-selector',
                                     options=[
                                         {"label": "Arial", "value": "Arial"},
                                         {"label": "Helvetica", "value": "Helvetica"},
@@ -677,7 +677,7 @@ def get_settings_modal_iso_distribution():
                                 html.Label("Plot Font Size"),
                                 # Slider for changing the font size for all text elements in the plots.
                                 dcc.Slider(
-                                    id="isotopomer-distribution-font-size",
+                                    id="isotopologue-distribution-font-size",
                                     min=5,
                                     max=20,
                                     step=1,
@@ -689,7 +689,7 @@ def get_settings_modal_iso_distribution():
                                 html.Label("Bargap (distance between groups, use with width)"),
                                 # Slider for editing the distance between sample groups elements in the plots.
                                 dcc.Slider(
-                                    id="isotopomer-distribution-bargap",
+                                    id="isotopologue-distribution-bargap",
                                     min=0,
                                     max=1,
                                     step=0.05,
@@ -701,7 +701,7 @@ def get_settings_modal_iso_distribution():
                                 # Slider for editing the distance between sample groups elements in the plots.
                                 html.Label("Boxwidth (width of the bar/box of the group)"),
                                 dcc.Slider(
-                                    id="isotopomer-distribution-barwidth",
+                                    id="isotopologue-distribution-barwidth",
                                     min=0,
                                     max=1,
                                     step=0.05,
@@ -712,7 +712,7 @@ def get_settings_modal_iso_distribution():
                         ], className="settings-dbc-row"),
                         ]),
                     dbc.ModalFooter(
-                        dbc.Button("Update", id="update-settings-isotopomer-distribution", n_clicks=0, color="success")
+                        dbc.Button("Update", id="update-settings-isotopologue-distribution", n_clicks=0, color="success")
                     )
                 ],
                 id="modal-settings-istopomer-distribution",
@@ -957,23 +957,23 @@ def get_pvalue_modal_bulk_metabolomics():
             )
     
     
-def get_pvalue_modal_isotopomer_distribution():
+def get_pvalue_modal_isotopologue_distribution():
     return dbc.Modal(
                 [
-                    dbc.ModalHeader("Configure p-value calculations for isotopomer distribution data."),
+                    dbc.ModalHeader("Configure p-value calculations for Isotopologue distribution data."),
                     dbc.ModalBody([
                         dbc.Row([
-                            dbc.Col(html.Div(id='p-value-data-order-isotopomer-distribution', children=[]))
+                            dbc.Col(html.Div(id='p-value-data-order-isotopologue-distribution', children=[]))
                         ],
                         justify='center',
                         align='center'),
                         dbc.Row([
-                            dbc.Col(dbc.Button("Add p-value Comparison", id="add-pvalue-isotopomer-distribution-dropdown", n_clicks=0, color="info"), className='just-a-button')
+                            dbc.Col(dbc.Button("Add p-value Comparison", id="add-pvalue-isotopologue-distribution-dropdown", n_clicks=0, color="info"), className='just-a-button')
                         ],
                         justify='center',
                         align='center'),
                         # Container for selecting sample group pairs for p value comparison.
-                        html.Div(id='p-value-isotopomer-distribution-dropdown-container', children=[])
+                        html.Div(id='p-value-isotopologue-distribution-dropdown-container', children=[])
                     ]),
                     dbc.ModalFooter([
                         dbc.Row([
@@ -982,7 +982,7 @@ def get_pvalue_modal_isotopomer_distribution():
                                 options=[
                                         {"label": "Display numerical p-value", "value": 1}
                                 ],
-                                id="numerical-p-value-checkbox-isotopomer-distribution",
+                                id="numerical-p-value-checkbox-isotopologue-distribution",
                                 inline=True,
                                 value=[]
                             ),
@@ -990,19 +990,19 @@ def get_pvalue_modal_isotopomer_distribution():
                             style={"text-align": "center"}
                             ),
                             dbc.Col(
-                                dbc.Button("Clear All", id="clear-p-value-isotopomer-distribution", n_clicks=0),
+                                dbc.Button("Clear All", id="clear-p-value-isotopologue-distribution", n_clicks=0),
                                 width=4,
                                 style={"text-align": "center"}
                             ),
                             dbc.Col(
-                                dbc.Button("Update", id="update-p-value-isotopomer-distribution", n_clicks=0, color="success"),
+                                dbc.Button("Update", id="update-p-value-isotopologue-distribution", n_clicks=0, color="success"),
                                 width=4,
                                 style={"text-align": "center"}
                             )
                         ]),
                     ])
                 ],
-                id="modal-p-value-isotopomer-distribution",
+                id="modal-p-value-isotopologue-distribution",
                 size='xl',
                 is_open=False,
                 backdrop="static"

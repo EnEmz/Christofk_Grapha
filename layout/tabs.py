@@ -12,10 +12,10 @@ def get_tabs_parent():
         children=
             [
                 get_tab_bulk_pool_heatmap(),
-                get_tab_bulk_isotopomer_heatmap(),
+                get_tab_bulk_isotopologue_heatmap(),
                 get_tab_custom_heatmap(),
                 get_tab_bulk_metabolomics(),
-                get_tab_isotopomer_distribution(),
+                get_tab_isotopologue_distribution(),
                 get_tab_volcano()
             ]
     )
@@ -69,21 +69,21 @@ def get_tab_bulk_pool_heatmap():
         ]
     )
     
-def get_tab_bulk_isotopomer_heatmap():
+def get_tab_bulk_isotopologue_heatmap():
     return dbc.Tab(
-        label='Bulk Isotopomer Heatmap',
+        label='Bulk isotopologue Heatmap',
         children=[
              dbc.Row([
                  dbc.Col(
-                     create_button("Generate Bulk Isotopomer Heatmap",
-                                             "generate-bulk-isotopomer-heatmap-plot",
+                     create_button("Generate Bulk Isotopologue Heatmap",
+                                             "generate-bulk-isotopologue-heatmap-plot",
                                              color='success'),
                      className='just-a-button'
                  ),
                  
                  dbc.Col(
                      create_button("Change Heatmap Settings",
-                                             "change-settings-bulk-isotopomer-heatmap",
+                                             "change-settings-bulk-isotopologue-heatmap",
                                              color='secondary'),
                      className='just-a-button'
                  )
@@ -92,13 +92,13 @@ def get_tab_bulk_isotopomer_heatmap():
             align='center'),
              
             html.Div(
-                id="loader-wrapper-bulk-isotopomer-heatmap", 
+                id="loader-wrapper-bulk-Isotopologue-heatmap", 
                 children=[
-                    dcc.Loading(id='loading-bulk-isotopomer-heatmap',
+                    dcc.Loading(id='loading-bulk-isotopologue-heatmap',
                                 type='circle',
                                 fullscreen=False,
                                 # Container for the bulk metabolomics plots
-                                children=html.Div(id="bulk-isotopomer-heatmap-plot-container", 
+                                children=html.Div(id="bulk-isotopologue-heatmap-plot-container", 
                                                   className='heatmap-plot-container')
                     )
             ]),
@@ -207,15 +207,15 @@ def get_tab_bulk_metabolomics():
     )
     
     
-# Isotopomer distribution tab
-def get_tab_isotopomer_distribution():
+# isotopologue distribution tab
+def get_tab_isotopologue_distribution():
     return dbc.Tab(
-        label="Isotopomer Distribution",
+        label="Isotopologue Distribution",
         children=[
             dbc.Row([
                 dbc.Col(
-                    create_dropdown_with_label("Select a Metabolite for Isotopomer Distribution Plot",
-                                                         "isotopomer-distribution-dropdown",
+                    create_dropdown_with_label("Select a Metabolite for Isotopologue Distribution Plot",
+                                                         "isotopologue-distribution-dropdown",
                                                          placeholder="Select a metabolite name"),
                 width=3)
             ],
@@ -225,19 +225,19 @@ def get_tab_isotopomer_distribution():
             dbc.Row([
                 dbc.Col(
                     create_button("Configure p-value Calculations",
-                                            "configure-p-value-isotopomer-distribution",
+                                            "configure-p-value-isotopologue-distribution",
                                             color="info"),
                     className='just-a-button'
                 ),
                 dbc.Col(
                     create_button("Generate Metabolomics Plots",
-                                            "generate-isotopomer-distribution",
+                                            "generate-isotopologue-distribution",
                                             color="success"),
                     className='just-a-button'
                 ),
                 dbc.Col(
                     create_button("Change Metabolomics Plot Settings",
-                                            "change-settings-isotopomer-distribution",
+                                            "change-settings-isotopologue-distribution",
                                             color="secondary"),
                     className='just-a-button'
                 ),
@@ -246,9 +246,9 @@ def get_tab_isotopomer_distribution():
             align='center'
             ),
             
-            html.Div(id='isotopomer-distribution-container', 
+            html.Div(id='isotopologue-distribution-container', 
                      children=[
-                        dcc.Graph(id='isotopomer-distribution-plot', 
+                        dcc.Graph(id='isotopologue-distribution-plot', 
                                   style={'display': 'none'})
                      ],
                      className='graph-container'

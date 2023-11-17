@@ -87,12 +87,12 @@ def update_upload_status(stored_pool_data, stored_iso_data, filename):
     """
     Callback function to update the upload status and display the uploaded filename.
     
-    This function takes the stored pool and isotopomer data, as well as the filename of the uploaded file,
+    This function takes the stored pool and isotopologue data, as well as the filename of the uploaded file,
     to generate appropriate upload status messages and display the filename.
     
     Parameters:
     stored_pool_data (str): JSON string representing the stored pool data.
-    stored_iso_data (str): JSON string representing the stored isotopomer data.
+    stored_iso_data (str): JSON string representing the stored isotopologue data.
     filename (str): The name of the uploaded file.
     
     Returns:
@@ -112,7 +112,7 @@ def update_upload_status(stored_pool_data, stored_iso_data, filename):
         return html.Span('Pool data successfully uploaded', style={'color': 'green'}), filename_display
     elif stored_pool_data is not None and stored_iso_data is not None:
         # Case: Both pool and isotopic data are uploaded
-        return html.Span('Both pool and isotopomer data successfully uploaded', style={'color': 'green'}), filename_display
+        return html.Span('Both pool and isotopologue data successfully uploaded', style={'color': 'green'}), filename_display
     else:
         # Case: Unexpected error
         print("There was an unexpected error when updating filename status!")

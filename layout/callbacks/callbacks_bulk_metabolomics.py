@@ -36,7 +36,7 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
     Parameters:
     - n_clicks (int): Number of times the generate-metabolomics button has been clicked.
     - pool_data (json): JSON data from the pooled metabolite data.
-    - iso_data (json): JSON data from the isotopomer data.
+    - iso_data (json): JSON data from the isotopologue data.
     - met_classes (dict): User-selected metabolite classes.
     - met_normalization (dict): User-selected normalization variables.
     - met_groups (dict): User-defined sample groups.
@@ -72,10 +72,10 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         
         
         
-        # Initialize bool variable to check if isotopomer data is present
+        # Initialize bool variable to check if isotopologue data is present
         df_iso = None
         
-        # Reas isotopomer data if available
+        # Reas isotopologue data if available
         if iso_data is not None:
             iso_json_file = io.StringIO(iso_data)
             df_iso = pd.read_json(iso_json_file, orient='split')
@@ -136,7 +136,7 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
                 dbc_row = dbc.Row(children=[])  
                 
                 # FOR ISO DATA
-                # Get the same metabolite isotopomer data if iso_present is True
+                # Get the same metabolite isotopologue data if iso_present is True
                 if iso_present is True:
                     df_met_iso = df_iso[df_iso['Compound'] == met_name]
                     

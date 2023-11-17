@@ -324,7 +324,7 @@ def add_p_value_annotations_pool(fig, array_columns, numerical_present, settings
 
 def generate_single_met_iso_figure(df_metabolite, grouped_samples, settings):
     ''' 
-    Generates a stacked bar plot for metabolite isotopomers across different sample groups with error bars and hover texts.
+    Generates a stacked bar plot for metabolite isotopologues across different sample groups with error bars and hover texts.
     
     Parameters:
     ----------
@@ -430,7 +430,7 @@ def generate_single_met_iso_figure(df_metabolite, grouped_samples, settings):
     
 def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_columns, numerical_present, settings, color='black'):
     ''' 
-    Adds p-value annotations to the metabolomics isotopomer stacked bar plot based on comparisons
+    Adds p-value annotations to the metabolomics isotopologue stacked bar plot based on comparisons
     between specified groups. It adjusts the height of the plot dynamically to accommodate the
     annotations.
 
@@ -439,7 +439,7 @@ def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_colum
     fig : plotly.graph_objs._figure.Figure
         The Plotly figure object that holds the stacked bar plot.
     df_metabolite : pandas.DataFrame
-        A DataFrame containing the metabolite concentration data and isotopomer labeling.
+        A DataFrame containing the metabolite concentration data and isotopologue labeling.
     grouped_samples : dict
         A dictionary mapping group names to lists of sample names within those groups.
     array_columns : list of lists or np.array
@@ -1137,7 +1137,7 @@ def add_nd_annotations_and_update_values(heatmap_fig, ctrl_cols):
                 # Add the cell to the 'nd' annotated set
                 nd_annotated_cells.add((y_index, x_index))
 
-    # Check if the user has submitted ctrl_cols (bulk isotopomer heatmap does not need it)
+    # Check if the user has submitted ctrl_cols (bulk isotopologue heatmap does not need it)
     if ctrl_cols != []:
         # Second pass to set zeros based on control columns being all zero
         for y_index, y_val in enumerate(y_data):
@@ -1375,7 +1375,7 @@ def calculate_offsets_for_volcano_annotations(new_point, stored_points, standoff
     return best_ax, best_ay
 
 
-def generate_isotopomer_distribution_figure(df_iso_met, grouped_samples, settings):
+def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, settings):
     
     
     
@@ -1383,7 +1383,7 @@ def generate_isotopomer_distribution_figure(df_iso_met, grouped_samples, setting
     
     encountered_groups = set()  # Keep track of processed sample groups to manage legend entries
 
-    # Iterate through every isotopomer for the metabolite data
+    # Iterate through every isotopologue for the metabolite data
     for label in df_iso_met['C_Label'].unique():
         # Check if all values are zero across all sample groups for this C_Label
         all_zero = True
@@ -1442,7 +1442,7 @@ def generate_isotopomer_distribution_figure(df_iso_met, grouped_samples, setting
     fig.update_layout(
         barmode='group',
         bargap=settings['bargap'],
-        xaxis_title='Isotopomer',
+        xaxis_title='Isotopologue',
         yaxis_title='% Composition of Pool Data',
         height = settings['height'],
         width = settings['width'],

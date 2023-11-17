@@ -23,21 +23,21 @@ def build_storage_components():
     
     # For settings
     storage_components.append(get_storage('store-bulk-heatmap-settings'))
-    storage_components.append(get_storage('store-bulk-isotopomer-heatmap-settings'))
+    storage_components.append(get_storage('store-bulk-isotopologue-heatmap-settings'))
     storage_components.append(get_storage('store-custom-heatmap-settings'))
     storage_components.append(get_storage('store-settings-metabolomics'))
-    storage_components.append(get_storage('store-settings-isotopomer-distribution'))
+    storage_components.append(get_storage('store-settings-isotopologue-distribution'))
     storage_components.append(get_storage('store-volcano-settings'))
     
     # For plots
     storage_components.append(get_storage('store-bulk-heatmap-plot'))
-    storage_components.append(get_storage('store-bulk-isotopomer-heatmap-plot'))
+    storage_components.append(get_storage('store-bulk-isotopologue-heatmap-plot'))
     storage_components.append(get_storage('store-custom-heatmap-plot'))
     storage_components.append(get_storage('store-volcano-plot'))
     
     # For statistics
     storage_components.append(get_storage('store-p-value-metabolomics'))
-    storage_components.append(get_storage('store-p-value-isotopomer-distribution'))
+    storage_components.append(get_storage('store-p-value-isotopologue-distribution'))
     
     # For plot manipulation
     storage_components.append(get_storage('store-volcano-clicked-datapoints'))

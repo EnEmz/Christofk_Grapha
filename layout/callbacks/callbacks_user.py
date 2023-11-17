@@ -9,6 +9,7 @@ from dash import html, dcc, no_update, callback_context
 import json
 
 from app import app
+from layout.config import normalization_preselected
 
 
 # Met classes callback functions
@@ -129,7 +130,7 @@ def generate_normalization_dropdown(pool_data):
     preselected_options = []  # List to store options that should be preselected
     
     if pool_data:  # Check if pool_data is available
-        strings_to_check = ['trifluoromethanesulfonate', 'quantity/sample']  # Keywords to identify relevant options
+        strings_to_check = normalization_preselected  # Keywords to identify relevant options
         
         # Read the pool data into a pandas DataFrame
         pool_json_file = io.StringIO(pool_data)
@@ -389,7 +390,7 @@ def store_data_order_selection(n_clicks, met_groups, column_state, data):
 @app.callback(
 [
     Output('p-value-data-order-metabolomics', 'children'),
-    Output('p-value-data-order-isotopomer-distribution', 'children'),
+    Output('p-value-data-order-isotopologue-distribution', 'children'),
     Output('metabolomics-pool-dynamic-checkbox-input', 'children'),
 ],
     Input('store-data-order', 'data')
@@ -591,17 +592,17 @@ def store_p_value_metabolomics(n_clicks, dropdown_values, dropdown2_values, nume
 
 
 @app.callback(
-    Output('p-value-isotopomer-distribution-dropdown-container', 'children'),
+    Output('p-value-isotopologue-distribution-dropdown-container', 'children'),
 [
-    Input('add-pvalue-isotopomer-distribution-dropdown', 'n_clicks'),
-    Input('clear-p-value-isotopomer-distribution', 'n_clicks')
+    Input('add-pvalue-isotopologue-distribution-dropdown', 'n_clicks'),
+    Input('clear-p-value-isotopologue-distribution', 'n_clicks')
 ],
 [
     State('store-data-order', 'data'),
-    State('p-value-isotopomer-distribution-dropdown-container', 'children')
+    State('p-value-isotopologue-distribution-dropdown-container', 'children')
 ]
 )
-def manage_pvalue_dropdown_isotopomer_distribution(add_clicks, clear_clicks, stored_group_order, children):
+def manage_pvalue_dropdown_isotopologue_distribution(add_clicks, clear_clicks, stored_group_order, children):
     """
     Manage the dynamic addition and clearing of dropdowns for p-value comparisons for metabolomics data
     in the p-value comparisons modal for bulk metabolomics.
@@ -622,11 +623,11 @@ def manage_pvalue_dropdown_isotopomer_distribution(add_clicks, clear_clicks, sto
     ctx = callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    if button_id == 'clear-p-value-isotopomer-distribution' and clear_clicks:
+    if button_id == 'clear-p-value-isotopologue-distribution' and clear_clicks:
         # If the clear button was clicked, remove all dropdowns
         return []
 
-    elif button_id == 'add-pvalue-isotopomer-distribution-dropdown' and add_clicks:
+    elif button_id == 'add-pvalue-isotopologue-distribution-dropdown' and add_clicks:
         if stored_group_order is None:
             return no_update
         
@@ -640,7 +641,7 @@ def manage_pvalue_dropdown_isotopomer_distribution(add_clicks, clear_clicks, sto
                 dbc.Col(html.Div(html.Label(f'Comparison #{new_element_id + 1}:'), style={'textAlign': 'center'}), width=2),
                 dbc.Col(html.Div(dcc.Dropdown(
                     id={
-                        'type': 'dynamic-dropdown-p-value-isotopomer-distribution',
+                        'type': 'dynamic-dropdown-p-value-isotopologue-distribution',
                         'index': new_element_id
                     },
                     options=sample_groups_dropdown,
@@ -648,7 +649,7 @@ def manage_pvalue_dropdown_isotopomer_distribution(add_clicks, clear_clicks, sto
                 dbc.Col(html.Div(html.Label('to'), style={'textAlign': 'center'}), width=1),
                 dbc.Col(html.Div(dcc.Dropdown(
                     id={
-                        'type': 'dynamic-dropdown2-p-value-isotopomer-distribution',
+                        'type': 'dynamic-dropdown2-p-value-isotopologue-distribution',
                         'index': new_element_id
                     },
                     options=sample_groups_dropdown,
@@ -666,17 +667,17 @@ def manage_pvalue_dropdown_isotopomer_distribution(add_clicks, clear_clicks, sto
 
 
 @app.callback(
-    Output('store-p-value-isotopomer-distribution', 'data'),
-    Input('update-p-value-isotopomer-distribution', 'n_clicks'),
+    Output('store-p-value-isotopologue-distribution', 'data'),
+    Input('update-p-value-isotopologue-distribution', 'n_clicks'),
 [
-    State({'type': 'dynamic-dropdown-p-value-isotopomer-distribution', 'index': ALL}, 'value'),
-    State({'type': 'dynamic-dropdown2-p-value-isotopomer-distribution', 'index': ALL}, 'value'),
-    State('numerical-p-value-checkbox-isotopomer-distribution', 'value'),
+    State({'type': 'dynamic-dropdown-p-value-isotopologue-distribution', 'index': ALL}, 'value'),
+    State({'type': 'dynamic-dropdown2-p-value-isotopologue-distribution', 'index': ALL}, 'value'),
+    State('numerical-p-value-checkbox-isotopologue-distribution', 'value'),
     State('store-data-order', 'data')
 ],
     prevent_initial_call=True
 )
-def store_p_value_isotopomer_distribution(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, stored_group_order):
+def store_p_value_isotopologue_distribution(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, stored_group_order):
     """
     Store the selected p-value comparisons and numerical p-value checkbox state for metabolomics data.
     
@@ -968,21 +969,21 @@ def store_settings_bulk_heatmap(n_clicks,
 
 
 @app.callback(
-    Output('store-bulk-isotopomer-heatmap-settings', 'data'),
+    Output('store-bulk-isotopologue-heatmap-settings', 'data'),
 [
-    Input('update-settings-bulk-isotopomer-heatmap', 'n_clicks'),
+    Input('update-settings-bulk-isotopologue-heatmap', 'n_clicks'),
     Input('store-data-order', 'data')
 ],
 [
-    State('bulk-isotopomer-heatmap-height-modifier', 'value'),
-    State('bulk-isotopomer-heatmap-width-modifier', 'value'),
-    State('bulk-isotopomer-heatmap-font-selector', 'value'),
-    State('bulk-isotopomer-heatmap-font-size', 'value'),
-    State('bulk-isotopomer-heatmap-unch-val-color', 'value'),
-    State('bulk-isotopomer-heatmap-inc-val-color', 'value')
+    State('bulk-isotopologue-heatmap-height-modifier', 'value'),
+    State('bulk-isotopologue-heatmap-width-modifier', 'value'),
+    State('bulk-isotopologue-heatmap-font-selector', 'value'),
+    State('bulk-isotopologue-heatmap-font-size', 'value'),
+    State('bulk-isotopologue-heatmap-unch-val-color', 'value'),
+    State('bulk-isotopologue-heatmap-inc-val-color', 'value')
 ]
 )
-def store_settings_bulk_isotopomer_heatmap(n_clicks,
+def store_settings_bulk_isotopologue_heatmap(n_clicks,
                                 store_data_order,
                                 height_modifier, 
                                 width_modifier, 
@@ -1082,21 +1083,21 @@ def store_settings_custom_heatmap(n_clicks,
 
 
 @app.callback(
-    Output('store-settings-isotopomer-distribution', 'data'),
+    Output('store-settings-isotopologue-distribution', 'data'),
 [
-    Input('update-settings-isotopomer-distribution', 'n_clicks'),
+    Input('update-settings-isotopologue-distribution', 'n_clicks'),
     Input('store-data-order', 'data')
 ],
 [
-    State('isotopomer-distribution-height', 'value'),
-    State('isotopomer-distribution-width', 'value'),
-    State('isotopomer-distribution-font-selector', 'value'),
-    State('isotopomer-distribution-font-size', 'value'),
-    State('isotopomer-distribution-bargap', 'value'),
-    State('isotopomer-distribution-barwidth', 'value'),
+    State('isotopologue-distribution-height', 'value'),
+    State('isotopologue-distribution-width', 'value'),
+    State('isotopologue-distribution-font-selector', 'value'),
+    State('isotopologue-distribution-font-size', 'value'),
+    State('isotopologue-distribution-bargap', 'value'),
+    State('isotopologue-distribution-barwidth', 'value'),
 ]
 )
-def store_settings_isotopomer_distribution(n_clicks, 
+def store_settings_isotopologue_distribution(n_clicks, 
                                 stored_data_order,
                                 height, 
                                 width, 

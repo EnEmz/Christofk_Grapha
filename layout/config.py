@@ -4,6 +4,9 @@ import pandas as pd
 
 from layout.utilities_layout import generate_classes_checklist_options_with_met_names
 
+# Insert your preselected options for the normalization of the pool data
+normalization_preselected = ['trifluoromethanesulfonate', 'quantity/sample']
+
 path_met_pathway_list = '/Users/nedas/Documents/Python/analyte_classes_philic.csv'
 
 df_met_group_list = pd.read_csv(path_met_pathway_list)
@@ -35,7 +38,7 @@ met_class_list_preselected = [
                             "histidine metabolism"
                             ]
 
-# Color palette for isotopomer bar pltos and iso distribution plot
+# Color palette for isotopologue bar pltos and iso distribution plot
 iso_color_palette = [
     "#C4C3C3",  # Light Gray
     "#FA8072",  # Salmon
