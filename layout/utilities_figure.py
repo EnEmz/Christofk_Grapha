@@ -935,18 +935,20 @@ def generate_individual_heatmap(pathway_df, grouped_samples, settings, group_sig
     plot_heatmap_data = pd.DataFrame(index=heatmap_data.index)
     hovertext = pd.DataFrame(index=heatmap_data.index)  
     
-    plot_heatmap_data['gap_start'] = np.nan  # Adding a starting gap column with NaN values
-    hovertext['gap_start'] = ''
+    if settings['first_gap_present'] == True:
+        plot_heatmap_data['gap_start'] = np.nan  # Adding a starting gap column with NaN values
+        hovertext['gap_start'] = ''
     
     prev_group = None
     for column in heatmap_data.columns:
         current_group = find_group(column, grouped_samples)
         
-        # Insert a gap column when group changes
-        if current_group != prev_group and prev_group is not None:
-            gap_column_name = f'gap_{prev_group}'
-            plot_heatmap_data[gap_column_name] = np.nan
-            hovertext[gap_column_name] = ''
+        if settings['group_gaps_present'] == True:
+            # Insert a gap column when group changes
+            if current_group != prev_group and prev_group is not None:
+                gap_column_name = f'gap_{prev_group}'
+                plot_heatmap_data[gap_column_name] = np.nan
+                hovertext[gap_column_name] = ''
         
         # Insert the actual data
         plot_heatmap_data[column] = heatmap_data[column]
@@ -979,36 +981,21 @@ def generate_individual_heatmap(pathway_df, grouped_samples, settings, group_sig
     width_per_group = 75 * settings['width_modifier']
     width = len(heatmap_data.columns) * width_per_group 
     
-    # Updating the x-axis with the necessary tick values and labels
-    tickvals, ticktext = [], []
-    for i, col in enumerate(heatmap_data.columns):
-        if 'gap' in col:
-            tickvals.append(i)
-            ticktext.append(col.split('_')[1])
-        else:
-            tickvals.append(i)
-            ticktext.append('')
+    include_first_gap = settings['first_gap_present']
+    include_group_gaps = settings['group_gaps_present']
+    gap_width = 1  # Assuming each gap is 1 unit wide
     
-    # Calculating positions for group labels on the x-axis
-    tickvals, ticktext = [], []
-    # Start at 1 since there is a gap col in the beginning
-    current_col_index = 1
+    # Calculate middle points of each sample group in the heatmap
+    middle_points = calculate_heatmap_group_middle_points(grouped_samples, include_first_gap, include_group_gaps, gap_width)
     
-    for group, columns in grouped_samples.items():
-        start_index = current_col_index  # Starting index of the group in the dataframe
-        num_samples_in_group = len(columns)
-        
-        # Middle index calculation considering each sample and its following gap
-        middle_index = start_index + (num_samples_in_group - 1) / 2
-        
-        tickvals.append(middle_index)
-        ticktext.append(f"<br>{group}")  # Group name as the x-axis label
-        
-        current_col_index += num_samples_in_group + 1  # +1 for the gap column
-        
-    # Adding a ending gap column
-    tickvals.append(current_col_index)
-    ticktext.append(f'gap_end')
+    # Adjust tickvals and ticktext based on middle_points
+    tickvals = list(middle_points.values())
+    ticktext = [f"<br>{group}" for group in middle_points.keys()]
+
+    # If the ending gap is also present, adjust accordingly
+    # if settings['ending_gap_present']:  # Assuming this is another setting you might have
+    #     tickvals.append(max(tickvals) + gap_width)
+    #     ticktext.append('gap_end')
     
     # Updating the x-axis with settings
     heatmap.update_xaxes(
@@ -1051,14 +1038,36 @@ def generate_individual_heatmap(pathway_df, grouped_samples, settings, group_sig
                         font_family=settings['font_selector']
                         ))
     
-    if group_significance is not None:
-        heatmap = add_heatmap_significance_annotations(heatmap, y_labels, group_significance, settings)
+    if settings['sig_dots_present'] == True:
+        if group_significance is not None:
+            heatmap = add_heatmap_significance_annotations(heatmap, y_labels, group_significance, settings)
     
     add_nd_annotations_and_update_values(heatmap, ctrl_cols)
         
     update_colorscale(heatmap, colorscale, data_type)
     
     return heatmap
+
+
+def calculate_heatmap_group_middle_points(grouped_samples, include_first_gap, include_group_gaps, gap_width):
+    middle_points = {}
+    current_position = 0
+
+    if include_first_gap:
+        current_position += gap_width  # Account for the first gap column
+
+    for group, columns in grouped_samples.items():
+        group_start = current_position
+        group_end = group_start + len(columns) - 1
+
+        group_middle = (group_start + group_end) / 2
+        middle_points[group] = group_middle
+
+        current_position = group_end + 1
+        if include_group_gaps:
+            current_position += gap_width  # Account for gap columns between sample groups
+
+    return middle_points
 
 
 def update_colorscale(heatmap_fig, colorscale, data_type):

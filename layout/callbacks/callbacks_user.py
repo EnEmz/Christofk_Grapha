@@ -923,7 +923,10 @@ def store_mettings_volcano(n_clicks,
     State('bulk-heatmap-font-size', 'value'),
     State('bulk-heatmap-dec-val-color', 'value'),
     State('bulk-heatmap-unch-val-color', 'value'),
-    State('bulk-heatmap-inc-val-color', 'value')
+    State('bulk-heatmap-inc-val-color', 'value'),
+    State('bulk-pool-heatmap-sig-dots-present', 'value'),
+    State('bulk-pool-heatmap-first-gap-present', 'value'),
+    State('bulk-pool-heatmap-group-gaps-present', 'value')
 ]
 )
 def store_settings_bulk_heatmap(n_clicks,
@@ -934,7 +937,10 @@ def store_settings_bulk_heatmap(n_clicks,
                                 font_size,
                                 decreased_color,
                                 unchanged_color,
-                                increased_color):
+                                increased_color,
+                                sig_dots_present,
+                                first_gap_present,
+                                group_gaps_present):
 
     # If store-data-order is updated, store the current state values (used as placeholders)
     if store_data_order is not None:
@@ -945,7 +951,10 @@ def store_settings_bulk_heatmap(n_clicks,
             'font_size': font_size,
             'decreased_color': decreased_color,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
         
         return initial_settings
@@ -959,7 +968,10 @@ def store_settings_bulk_heatmap(n_clicks,
             'font_size': font_size,
             'decreased_color': decreased_color,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
         
         return new_settings
@@ -980,7 +992,10 @@ def store_settings_bulk_heatmap(n_clicks,
     State('bulk-isotopologue-heatmap-font-selector', 'value'),
     State('bulk-isotopologue-heatmap-font-size', 'value'),
     State('bulk-isotopologue-heatmap-unch-val-color', 'value'),
-    State('bulk-isotopologue-heatmap-inc-val-color', 'value')
+    State('bulk-isotopologue-heatmap-inc-val-color', 'value'),
+    State('bulk-isotopologue-heatmap-sig-dots-present', 'value'),
+    State('bulk-isotopologue-heatmap-first-gap-present', 'value'),
+    State('bulk-isotopologue-heatmap-group-gaps-present', 'value')
 ]
 )
 def store_settings_bulk_isotopologue_heatmap(n_clicks,
@@ -990,7 +1005,10 @@ def store_settings_bulk_isotopologue_heatmap(n_clicks,
                                 font_selector, 
                                 font_size,
                                 unchanged_color,
-                                increased_color):
+                                increased_color,
+                                sig_dots_present,
+                                first_gap_present,
+                                group_gaps_present):
 
     # If store-data-order is updated, store the current state values (used as placeholders)
     if store_data_order is not None:
@@ -1000,7 +1018,10 @@ def store_settings_bulk_isotopologue_heatmap(n_clicks,
             'font_selector': font_selector,
             'font_size': font_size,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
         
         return initial_settings
@@ -1013,7 +1034,10 @@ def store_settings_bulk_isotopologue_heatmap(n_clicks,
             'font_selector': font_selector,
             'font_size': font_size,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
         
         return new_settings
@@ -1035,7 +1059,10 @@ def store_settings_bulk_isotopologue_heatmap(n_clicks,
     State('custom-heatmap-font-size', 'value'),
     State('custom-heatmap-dec-val-color', 'value'),
     State('custom-heatmap-unch-val-color', 'value'),
-    State('custom-heatmap-inc-val-color', 'value')
+    State('custom-heatmap-inc-val-color', 'value'),
+    State('custom-heatmap-sig-dots-present', 'value'),
+    State('custom-heatmap-first-gap-present', 'value'),
+    State('custom-heatmap-group-gaps-present', 'value')
 ]
 )
 def store_settings_custom_heatmap(n_clicks,
@@ -1046,7 +1073,10 @@ def store_settings_custom_heatmap(n_clicks,
                                 font_size,
                                 decreased_color,
                                 unchanged_color,
-                                increased_color):
+                                increased_color,
+                                sig_dots_present,
+                                first_gap_present,
+                                group_gaps_present):
 
     # If store-data-order is updated, store the current state values (used as placeholders)
     if store_data_order is not None:
@@ -1057,7 +1087,10 @@ def store_settings_custom_heatmap(n_clicks,
             'font_size': font_size,
             'decreased_color': decreased_color,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
         
         
@@ -1073,7 +1106,10 @@ def store_settings_custom_heatmap(n_clicks,
             'font_size': font_size,
             'decreased_color': decreased_color,
             'unchanged_color': unchanged_color,
-            'increased_color': increased_color
+            'increased_color': increased_color,
+            'sig_dots_present': True if sig_dots_present == [1] else False,
+            'first_gap_present': True if first_gap_present == [1] else False,
+            'group_gaps_present': True if group_gaps_present == [1] else False
         }
                 
         return new_settings

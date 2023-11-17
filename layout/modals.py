@@ -143,6 +143,7 @@ def get_settings_modal_bulk_heatmap():
                     dbc.ModalHeader("Settings for the bulk heatmap."),
                     dbc.ModalBody([
                         dbc.Row([
+                             html.Label("General Settings", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label("Height Modifier"),
                                 # Slider for height of the plots.
@@ -210,7 +211,7 @@ def get_settings_modal_bulk_heatmap():
                             ], className="settings-dbc-col"),
                         ], className="settings-dbc-row"),
                         dbc.Row([
-                            html.Label("Heatmap Colorscale Selection", className='sample-group-dropdown-label'),
+                            html.Label("Heatmap Colorscale", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label('Decreased Values'),
                                 dbc.Input(id='bulk-heatmap-dec-val-color', type='color', value='#08007d')
@@ -223,7 +224,44 @@ def get_settings_modal_bulk_heatmap():
                                 html.Label('Increased Values'),
                                 dbc.Input(id='bulk-heatmap-inc-val-color', type='color', value='#b30000')
                             ], className="settings-dbc-col")
-                        ], className="settings-dbc-row")
+                        ], className="settings-dbc-row"),
+                        
+                        dbc.Row([
+                             html.Label("Additional Settings", className='sample-group-dropdown-label'),
+                            dbc.Col([
+                                html.Label("Significance Dots Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-pool-heatmap-sig-dots-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Start Gap Column Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-pool-heatmap-first-gap-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Group Gap Columns Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-pool-heatmap-group-gaps-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                        ], className="settings-dbc-row"),
                     ]),
                     dbc.ModalFooter(
                         dbc.Button("Update", id="update-settings-bulk-heatmap", n_clicks=0, color="success"))
@@ -243,6 +281,7 @@ def get_settings_modal_bulk_isotopologue_heatmap():
                     dbc.ModalHeader("Settings for the bulk Isotopologue heatmap."),
                     dbc.ModalBody([
                         dbc.Row([
+                             html.Label("General Settings", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label("Height Modifier"),
                                 # Slider for height of the plots.
@@ -310,7 +349,7 @@ def get_settings_modal_bulk_isotopologue_heatmap():
                             ], className="settings-dbc-col"),
                         ], className="settings-dbc-row"),
                         dbc.Row([
-                            html.Label("Heatmap Colorscale Selection", className='sample-group-dropdown-label'),
+                            html.Label("Heatmap Colorscale", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label('Unchanged Values'),
                                 dbc.Input(id='bulk-isotopologue-heatmap-unch-val-color', type='color', value='#f8f9fa')
@@ -319,7 +358,44 @@ def get_settings_modal_bulk_isotopologue_heatmap():
                                 html.Label('Increased Values'),
                                 dbc.Input(id='bulk-isotopologue-heatmap-inc-val-color', type='color', value='#b30000')
                             ], className="settings-dbc-col")
-                        ], className="settings-dbc-row")
+                        ], className="settings-dbc-row"),
+                        
+                        dbc.Row([
+                             html.Label("Additional Settings", className='sample-group-dropdown-label'),
+                            dbc.Col([
+                                html.Label("Significance Dots Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-isotopologue-heatmap-sig-dots-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Start Gap Column Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-isotopologue-heatmap-first-gap-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Group Gap Columns Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="bulk-isotopologue-heatmap-group-gaps-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                        ], className="settings-dbc-row"),
                     ]),
                     dbc.ModalFooter(
                         dbc.Button("Update", id="update-settings-bulk-isotopologue-heatmap", n_clicks=0, color="success"))
@@ -338,6 +414,7 @@ def get_settings_modal_custom_heatmap():
                     dbc.ModalHeader("Settings for the custom heatmap"),
                     dbc.ModalBody([
                         dbc.Row([
+                             html.Label("General Settings", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label("Height"),
                                 # Slider for height of the plots.
@@ -405,7 +482,7 @@ def get_settings_modal_custom_heatmap():
                             ], className="settings-dbc-col"),
                         ], className="settings-dbc-row"),
                         dbc.Row([
-                            html.Label("Heatmap Colorscale Selection", className='sample-group-dropdown-label'),
+                            html.Label("Heatmap Colorscale", className='sample-group-dropdown-label'),
                             dbc.Col([
                                 html.Label('Decreased Values'),
                                 dbc.Input(id='custom-heatmap-dec-val-color', type='color', value='#08007d')
@@ -418,7 +495,44 @@ def get_settings_modal_custom_heatmap():
                                 html.Label('Increased Values'),
                                 dbc.Input(id='custom-heatmap-inc-val-color', type='color', value='#b30000')
                             ], className="settings-dbc-col")
-                        ], className="settings-dbc-row")
+                        ], className="settings-dbc-row"),
+                        
+                        dbc.Row([
+                             html.Label("Additional Settings", className='sample-group-dropdown-label'),
+                            dbc.Col([
+                                html.Label("Significance Dots Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[0],
+                                            id="custom-heatmap-sig-dots-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Start Gap Column Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="custom-heatmap-first-gap-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                            dbc.Col([
+                                html.Label("Group Gap Columns Present"),
+                                dbc.Checklist(
+                                            options=[
+                                                {"value": 1},
+                                            ],
+                                            value=[1],
+                                            id="custom-heatmap-group-gaps-present",
+                                            inline=True
+                                        )
+                            ], className="settings-dbc-col"),
+                        ], className="settings-dbc-row"),
                     ]),
                     dbc.ModalFooter(
                         dbc.Button("Update", id="update-settings-custom-heatmap", n_clicks=0, color="success")
