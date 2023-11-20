@@ -30,29 +30,6 @@ The app automatically detects the presence of isotopologue data based on the "No
 
    _Note_: The `metabolite_classes.csv` is pre-configured for files in `Example Data` folder. Adjust `metabolite_classes.csv` according to the metabolite names in your data file.
 
-### Using GitHub Codespaces
-
-GitHub Codespaces offers a fully-configured development environment with all the necessary tools and dependencies for running Christofk_Grapha. Follow these steps to use Codespaces:
-
-#### Open the Repository in Codespaces:
-
-- Navigate to the GitHub repository and click on the **Code** button. 
-- Select **Open with Codespaces** and then **New codespace**. 
-- This will create a new development environment with everything set up as per the `.devcontainer` configuration.
-
-#### Run the App in Codespaces:
-
-- Once your Codespace is ready, use the built-in terminal to navigate to the project directory.
-- Start the application by running `python index.py`. 
-- The integrated terminal will display a URL like `https://port-8050-your-codespace-name.githubpreview.dev/`.
-- Click the URL or copy and paste it into a browser tab to view the Christofk_Grapha app.
-
-#### Upload and Test Data:
-
-- The Codespace environment includes all files from the repository. You can access the `Example Data` folder and `metabolite_classes.csv` file directly.
-- Test the application using these files or upload your data as needed.
-
-
 ### Available Analysis Graphs
 
 #### Bulk Pool Size Heatmap
