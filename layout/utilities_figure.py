@@ -566,28 +566,14 @@ def group_met_pool_data(df, selected_met_classes):
     # Ensure that 'df_met_group_list' is a glocal pandas dataframe where molecules are organized in classes
     # and 'pathway_class' is the column name where the list of metabolite classes is available
     
-    # Print the initial DataFrames
-    print(f"Initial df:\n{df.head()}")
-    print(f"Initial df_met_group_list:\n{df_met_group_list.head()}")
-    
     # Filter the metabolite groups based on the selected metabolite classes
     df_met_group_select = df_met_group_list[df_met_group_list['pathway_class'].isin(selected_met_classes)]
-    
-    print(f"Filtered df_met_group_list based on selected classes:\n{df_met_group_select.head()}")
-    
-    # Print unique values for debugging
-    print(f"Unique values in df['Compound']:\n{df['Compound'].unique()}")
-    print(f"Unique values in df_met_group_select['analyte_name']:\n{df_met_group_select['analyte_name'].unique()}")
     
     # Merge the selected metabolite groups with the normalized pool data
     df_filtered = df_met_group_select.merge(df, left_on='analyte_name', right_on='Compound', how='inner')
     
-    print(f"DataFrame after merge (before dropping 'analyte_name'):\n{df_filtered.head()}")
-    
     # Drop the redundant 'analyte_name' column
     df_filtered.drop('analyte_name', axis=1, inplace=True)
-    
-    print(f"DataFrame after dropping 'analyte_name':\n{df_filtered.head()}")
     
     return df_filtered
 
