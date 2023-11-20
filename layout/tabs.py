@@ -71,7 +71,7 @@ def get_tab_bulk_pool_heatmap():
     
 def get_tab_bulk_isotopologue_heatmap():
     return dbc.Tab(
-        label='Bulk isotopologue Heatmap',
+        label='Bulk Isotopologue Heatmap',
         children=[
              dbc.Row([
                  dbc.Col(
