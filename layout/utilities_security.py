@@ -127,6 +127,9 @@ def process_pool_data(contents, filename, compound_column_name="Compound"):
     df_pool = read_excel_file(decoded_content, 'PoolAfterDF')
     df_pool = validate_column_names(df_pool, compound_column_name)
     df_pool = clean_column_headers(df_pool)
+    
+    print(df_pool)
+    
     # Additional processing specific to pool data can be added here.
     return df_pool.to_json(date_format='iso', orient='split')
 
@@ -143,10 +146,17 @@ def process_iso_data(contents, filename, stored_pool_data, compound_column_name=
         compound_column_name (str): Name of the column to check for in the isotopic data.
 
     Returns:
-        str: A JSON string representing the processed isotopic DataFrame if all validation checks pass.
+        str: A JSON string representing the processed isotopic DataFrame if all validation checks pass, or None if 'Normalized' sheet is not present.
     """
+    
     decoded_content = decode_contents(contents)
-    df_iso = read_excel_file(decoded_content, 'Normalized')
+
+    try:
+        df_iso = read_excel_file(decoded_content, 'Normalized')
+    except ValueError:
+        # If 'Normalized' sheet is not found in the Excel file, return None
+        return None
+
     df_iso = validate_column_names(df_iso, compound_column_name)
     df_iso = clean_column_headers(df_iso)
     # Additional processing specific to isotopic data can be added here.
