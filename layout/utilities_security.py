@@ -87,6 +87,26 @@ def validate_column_names(df, compound_column_name):
     return df
 
 
+def clean_compound_column(df, metabolite_name_column_name="Compound"):
+    """
+    Cleans up the 'Compound' column in the DataFrame by stripping leading and trailing whitespace.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame with the 'Compound' column to clean.
+        metabolite_name_column_name (str): The name of the 'Compound' column.
+
+    Returns:
+        pd.DataFrame: DataFrame with the cleaned 'Compound' column.
+    """
+    if metabolite_name_column_name in df.columns:
+        df[metabolite_name_column_name] = df[metabolite_name_column_name].str.strip()
+    else:
+        error_message = f"'{metabolite_name_column_name}' column not found in the DataFrame."
+        print(current_timestamp(), error_message)
+        raise ValueError(error_message)
+    return df
+
+
 def clean_column_headers(df):
     """
     Cleans up the DataFrame column headers by stripping whitespace and removing unwanted characters.
@@ -127,8 +147,7 @@ def process_pool_data(contents, filename, compound_column_name="Compound"):
     df_pool = read_excel_file(decoded_content, 'PoolAfterDF')
     df_pool = validate_column_names(df_pool, compound_column_name)
     df_pool = clean_column_headers(df_pool)
-    
-    print(df_pool)
+    df_pool = clean_compound_column(df_pool, compound_column_name)
     
     # Additional processing specific to pool data can be added here.
     return df_pool.to_json(date_format='iso', orient='split')
@@ -159,5 +178,8 @@ def process_iso_data(contents, filename, stored_pool_data, compound_column_name=
 
     df_iso = validate_column_names(df_iso, compound_column_name)
     df_iso = clean_column_headers(df_iso)
+    df_iso = clean_compound_column(df_iso, compound_column_name)
+    
     # Additional processing specific to isotopic data can be added here.
+    
     return df_iso.to_json(date_format='iso', orient='split')
