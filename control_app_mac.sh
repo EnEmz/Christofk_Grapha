@@ -18,18 +18,24 @@ stop_app() {
     lsof -i tcp:8050 | awk 'NR!=1 {print $2}' | xargs kill
     echo "Server shut down."
 
-    echo "Deactivating the virtual environment..."
-    deactivate
+    echo "Terminating all Python processes..."
+    pkill -f python
 }
 
-case "$1" in 
-    start)
-        start_app
-        ;;
-    stop)
-        stop_app
-        ;;
-    *)
-        echo "Usage: $0 {start|stop}"
-        exit 1
-esac
+while true; do
+    echo "Please type 'start' to run the app or 'stop' to stop it:"
+    read action
+
+    case "$action" in 
+        start)
+            start_app
+            ;;
+        stop)
+            stop_app
+            break
+            ;;
+        *)
+            echo "Invalid input. Please type 'start' or 'stop'."
+            ;;
+    esac
+done
