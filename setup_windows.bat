@@ -18,5 +18,8 @@ call %project_path%\venv\Scripts\activate.bat
 echo Installing dependencies from requirements.txt...
 pip install -r requirements.txt
 
+echo Deativating the virtual environment...
+call %project_path%\venv\Scripts\deactivate.bat
+
 echo Setup is complete!
 pause
