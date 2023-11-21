@@ -64,15 +64,22 @@ from app import app
 ],
 )
 def toggle_modal(*args):
-    """
-    Callback to toggle the visibility of various modals based on button clicks.
-    
+    '''
+    Toggle the visibility of various modals in response to button clicks.
+    This function uses a variable-length argument list to determine the current state and input 
+    of different UI elements, and accordingly adjusts the visibility of various modals.
+
     Parameters:
-    *args: Variable length argument list containing Inputs and States of the function.
-    
+    ----------
+    *args
+        Variable length argument list containing the Inputs and States relevant to the modal visibility.
+
     Returns:
-    tuple: Tuple of boolean values representing the visibility state of each modal.
-    """
+    -------
+    tuple
+        A tuple of boolean values, each representing the visibility state of a corresponding modal.
+    '''
+    
     ctx = callback_context  # Get callback context
     
     # If no button has been clicked, return the current state of all modals

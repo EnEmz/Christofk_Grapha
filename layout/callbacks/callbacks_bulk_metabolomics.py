@@ -34,18 +34,27 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
     Generates and displays metabolomics data visualizations based on various user inputs and selections.
     
     Parameters:
-    - n_clicks (int): Number of times the generate-metabolomics button has been clicked.
-    - pool_data (json): JSON data from the pooled metabolite data.
-    - iso_data (json): JSON data from the isotopologue data.
-    - met_classes (dict): User-selected metabolite classes.
-    - met_normalization (dict): User-selected normalization variables.
-    - met_groups (dict): User-defined sample groups.
-    - pvalue_info (dict): P-value settings and configurations.
-    - settings (dict): Additional settings for the visualizations.
+    n_clicks : int
+        Number of times the generate-metabolomics button has been clicked.
+    pool_data : json
+        JSON data from the pooled metabolite data.
+    iso_data : json
+        JSON data from the isotopologue data.
+    met_classes : dict
+        User-selected metabolite classes.
+    met_normalization (dict): User-selected normalization variables.
+    met_groups : dict
+        User-defined sample groups.
+    pvalue_info : dict
+        P-value settings and configurations.
+    settings : dict
+        Additional settings for the visualizations.
     
     Returns:
-    - html.Div: A div containing the generated visualizations.
-    - no_update: No update for the 'intermediate-toast-content-2' data, or a toast message if needed.
+    html.Div
+        A div containing the generated visualizations.
+    no_update
+        No update for the toast-container data, or a toast message if needed.
     """
     
     ctx = callback_context

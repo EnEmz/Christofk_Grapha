@@ -17,20 +17,23 @@ from layout.config import iso_color_palette
     Input('store-data-iso', 'data'),
 )
 def update_iso_distribution_dropdown_options(iso_data):
-    """
-    Update the options of the isotopologue distribution dropdown list.
-    
-    This function is triggered when there's new isotopologue data in the 'store-data-iso'.
-    It extracts unique metabolite compounds from the isotopologue data, sorts them,
-    and updates the dropdown options, enabling the user to select the metabolites 
-    they want to display in the isotopologue distribution.
-    
+    '''
+    Update the dropdown list options for selecting metabolites in the isotopologue distribution section.
+    This function is activated when new isotopologue data is present in the 'store-data-iso'. It processes 
+    the isotopologue data to extract and sort unique metabolite compounds, updating the dropdown options 
+    accordingly. This allows users to select specific metabolites for display in the isotopologue distribution.
+
     Parameters:
-    - iso_data (json): JSON-formatted string of the isotopologue data DataFrame.
-    
+    ----------
+    iso_data : json
+        JSON-formatted string containing the isotopologue data DataFrame.
+
     Returns:
-    - list: A list of dictionaries containing label and value pairs for the dropdown options.
-    """
+    -------
+    list
+        A list of dictionaries with label-value pairs for the dropdown options, 
+        representing the metabolites available for selection in the isotopologue distribution.
+    '''
     
     if iso_data is None:
         # If there's no data, return an empty options list
@@ -67,22 +70,32 @@ def update_iso_distribution_dropdown_options(iso_data):
     prevent_initial_call = True
 )
 def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_groups, pvalue_info, settings):
-    """
-    Display the isotopologue distribution plot based on user inputs and selections.
-    
-    This function is triggered by clicking the 'generate-isotopologue-distribution' button.
-    It creates a bar chart representing the isotopologue distributions for selected metabolites,
-    including the average and standard deviation calculations across sample groups.
-    
+    '''
+    Display an isotopologue distribution plot based on user-selected parameters and provided data.
+    This function is triggered by the 'generate-isotopologue-distribution' button and creates a bar chart 
+    showing the distributions of isotopologues for a selected metabolite, including average and standard deviation 
+    across different sample groups.
+
     Parameters:
-    - n_clicks (int): Number of button clicks.
-    - iso_data (json): JSON-formatted string of the isotopologue data DataFrame.
-    - met_name (str): Selected metabolite name from the dropdown.
-    - met_groups (dict): A dictionary containing sample groupings.
-    
+    ----------
+    n_clicks : int
+        Number of times the button has been clicked.
+    iso_data : json
+        JSON-formatted string containing the isotopologue data DataFrame.
+    met_name : str
+        Name of the selected metabolite from the dropdown.
+    met_groups : dict
+        Dictionary containing the grouping of samples for analysis.
+    pvalue_info : dict
+        Information about p-values for statistical significance.
+    settings : dict
+        Selected or placeholder settings for the isotopologue distribution plot.
+
     Returns:
-    - list: A list containing dcc.Graph object with the isotopologue distribution plot.
-    """
+    -------
+    list
+        A list containing dcc.Graph objects for the isotopologue distribution plot.
+    '''
     
     # Constants for bar widths and gaps in the plot
     BAR_WIDTH = 0.15

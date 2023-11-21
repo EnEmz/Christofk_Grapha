@@ -373,21 +373,35 @@ def display_bulk_isotopologue_heatmap_plot(n_clicks, iso_data, met_classes, met_
     prevent_initial_call=True
 )
 def display_custom_heatmap_plot(n_clicks, pool_data, met_normalization, met_groups, ctrl_group, custom_met_list, settings):
-    """
-    Generate and display a custom heatmap based on user-selected metabolites and groups.
-    
-    Parameters:
-    - n_clicks: int, Number of times the generate button has been clicked.
-    - pool_data: JSON, Stored metabolomics pool data.
-    - met_normalization: dict, Selected normalization methods.
-    - met_groups: dict, Grouping of samples.
-    - ctrl_group: str, Selected control group.
-    - custom_met_list: list, Selected metabolites for the custom heatmap.
+    '''
+    Generate and display a custom heatmap plot based on user-selected metabolites and groups.
+    The function also stores a JSON representation of the plot for later use.
 
-    Outputs:
-    - Custom heatmap display as HTML components.
-    - JSON data of the generated custom heatmap plots for further use or display.
-    """
+    Parameters:
+    ----------
+    n_clicks : int
+        Number of times the 'Generate Heatmap Plot' button is clicked.
+    pool_data : JSON
+        Stored metabolomics pool data.
+    met_normalization : dict
+        Selected normalization methods for the heatmap.
+    met_groups : dict
+        Grouping of samples for the heatmap.
+    ctrl_group : str
+        Selected control group for comparison.
+    custom_met_list : list
+        List of selected metabolites for the custom heatmap.
+    settings : dict
+        Selected or placeholder settings for the custom heatmap
+
+    Returns:
+    -------
+    list
+        A list of HTML Divs containing custom heatmap plots.
+    json
+        JSON representation of the created custom heatmap plots.
+    '''
+    
     # Get context to identify the triggering input
     ctx = callback_context
     
@@ -486,20 +500,23 @@ def display_custom_heatmap_plot(n_clicks, pool_data, met_normalization, met_grou
     Input('store-data-pool', 'data'),
 )
 def update_custom_heatmap_metabolite_list_options(pool_data):
-    """
-    Update the options of the metabolite dropdown list in the custom heatmap section.
-    
-    This function is triggered when there's new data in the 'store-data-pool'. 
-    It extracts unique metabolite compounds from the pool data, sorts them, 
-    and updates the dropdown options, enabling the user to select the metabolites 
-    they want to display in the heatmap.
-    
+    '''
+    Update the options in the metabolite dropdown list for the custom heatmap plot.
+    This function is activated when new data is available in the 'store-data-pool'. It processes 
+    the pool data to extract and sort unique metabolite compounds, and then updates the dropdown 
+    options to enable user selection of metabolites for the heatmap display.
+
     Parameters:
-    - pool_data (json): JSON-formatted string of the metabolite pool data DataFrame.
-    
+    ----------
+    pool_data : json
+        JSON-formatted string containing the metabolite pool data DataFrame.
+
     Returns:
-    - list: A list of dictionaries containing label and value pairs for the dropdown options.
-    """
+    -------
+    list
+        A list of dictionaries with label-value pairs for the dropdown options, 
+        representing the metabolites available for selection in the heatmap.
+    '''
     
     if pool_data is None:
         # If there's no data, returning an empty options list

@@ -19,18 +19,24 @@ from layout.config import normalization_preselected
     State('met-class-checklist', 'value')
 )
 def store_met_classes(n_clicks, selected_values):
-    """
-    Store the selected metabolite classes when the update button is clicked.
-    
+    '''
+    Store the selected metabolite classes based on user interaction with the update button.
+    This function is triggered when the user clicks the update button. It captures and stores the selected metabolite classes from a checklist. 
+    If no classes are selected or if the function is not triggered by a button click, it handles these scenarios appropriately.
+
     Parameters:
-    n_clicks (int): Number of button clicks, used to trigger the callback.
-    selected_values (list): The values selected in the checklist.
-    
+    ----------
+    n_clicks : int
+        Number of times the update button has been clicked.
+    selected_values : list
+        List of values selected in the metabolite class checklist.
+
     Returns:
-    dict or no_update: A dictionary containing the selected values, 
-                            None if no values are selected,
-                            or no_update if the callback was not triggered by the update button.
-    """
+    -------
+    dict or no_update
+        A dictionary containing the selected metabolite classes; None if no classes are selected;
+        or 'no_update' if the function is not triggered by a button click.
+    '''
     
     # Get the context to identify which Input triggered the callback
     ctx = callback_context    
@@ -65,19 +71,28 @@ def store_met_classes(n_clicks, selected_values):
 ]
 )
 def clear_select_all_met_classes(clear_clicks, select_clicks, selected_values, all_options):
-    """
-    Toggle the selected metabolite classes in the checklist based on "clear" or "select all" buttons being clicked.
-    
+    '''
+    Manage the selection of metabolite classes based on user interaction with "Clear" and "Select All" buttons.
+    This function toggles the selected metabolite classes in a checklist. It either clears all selections or selects all options 
+    depending on which button is clicked. If neither button is clicked, it maintains the current selection state.
+
     Parameters:
-    clear_clicks (int): The number of times the "Clear" button has been clicked.
-    select_clicks (int): The number of times the "Select All" button has been clicked.
-    selected_values (list): The current selected values in the checklist.
-    all_options (list): All options available in the checklist.
-    
+    ----------
+    clear_clicks : int
+        Number of times the "Clear" button has been clicked.
+    select_clicks : int
+        Number of times the "Select All" button has been clicked.
+    selected_values : list
+        The currently selected values in the metabolite class checklist.
+    all_options : list
+        All available options in the metabolite class checklist.
+
     Returns:
-    list: An empty list if the "clear" button was clicked, otherwise a list of all classes if "select all" was clicked,
-          or the current selected values if none were clicked.
-    """
+    -------
+    list
+        An empty list if the "Clear" button was clicked; a list of all classes if "Select All" was clicked;
+        or the current selected values if neither button was clicked.
+    '''
     
     # Get the context to identify which Input triggered the callback
     ctx = callback_context  
@@ -108,15 +123,24 @@ def clear_select_all_met_classes(clear_clicks, select_clicks, selected_values, a
     Input('store-data-pool', 'data')
 )
 def generate_normalization_dropdown(pool_data):
-    """
-    Generate a dropdown for normalization options based on uploaded pool data.
-    
+    '''
+    Create a dropdown for selecting normalization options, based on the uploaded pool data.
+    This function generates a dropdown UI element that allows users to choose from various normalization 
+    methods for data analysis. The availability and nature of the options are determined by the contents 
+    of the uploaded pool data.
+
     Parameters:
-    pool_data (json): JSON-formatted string containing the pool data.
-    
+    ----------
+    pool_data : json
+        JSON-formatted string containing the metabolomics pool data.
+
     Returns:
-    html.Div: A container with a Dropdown and optionally a placeholder message.
-    """
+    -------
+    html.Div
+        An HTML Div element containing a Dropdown for normalization options and, if necessary, 
+        a placeholder message indicating the state of the data or options.
+    '''
+    
     # Determine whether to disable the dropdown based on the presence of pool_data
     disabled = not pool_data
     
@@ -165,16 +189,24 @@ def generate_normalization_dropdown(pool_data):
     prevent_initial_call=True
 )
 def store_selected_normalization(n_clicks, selected_values):
-    """
-    Store the selected normalization values when the update button is clicked.
-    
+    '''
+    Save the selected normalization methods based on user interaction with the update button.
+    This function is triggered when the user clicks the update button and it captures and 
+    stores the normalization methods chosen from a dropdown. 
+    If no methods are selected, it handles this scenario appropriately.
+
     Parameters:
-    n_clicks (int): Number of button clicks. Used to trigger the callback.
-    selected_values (list): The selected values from the dropdown.
-    
+    ----------
+    n_clicks : int
+        Number of times the update button has been clicked.
+    selected_values : list
+        List of normalization methods selected in the dropdown.
+
     Returns:
-    dict: A dictionary containing the selected values, or None if no values are selected.
-    """
+    -------
+    dict
+        A dictionary containing the selected normalization methods; None if no methods are selected.
+    '''
     
     # Check if no values are selected in the dropdown
     if selected_values is None:
@@ -190,15 +222,22 @@ def store_selected_normalization(n_clicks, selected_values):
     Input('store-data-pool', 'data')
 )
 def display_met_groups(pool_data):
-    """
-    Display and possibly change metabolite groups based on uploaded metabolomics data file.
-    
+    '''
+    Show and allow modification of metabolite groups, based on the uploaded metabolomics data.
+    This function generates a user interface for displaying and potentially altering the grouping of metabolites. 
+    The groups are determined and potentially adjusted based on the metabolomics data file that has been uploaded and stored.
+
     Parameters:
-    pool_data (json): Stored data of uploaded metabolomics file.
-    
+    ----------
+    pool_data : json
+        JSON-formatted string containing the stored data from the uploaded metabolomics file.
+
     Returns:
-    list: A list of HTML Div components containing labels and inputs for metabolic groups.
-    """
+    -------
+    list
+        A list of HTML Div components, each containing labels and input fields for managing metabolic groups.
+    '''
+    
     # Check if there's any data uploaded
     if not pool_data:
         # Return a placeholder message if there's no uploaded data
@@ -240,17 +279,27 @@ def display_met_groups(pool_data):
     prevent_initial_call=True
 )
 def store_met_groups(n_clicks, input_ids, input_values):
-    """
-    Store the metabolite group variables in dcc.Store after the "update-groups" button is pressed.
-    
+    '''
+    Save sample group settings after the "update-groups" button is clicked.
+    This function is triggered when the user clicks the "update-groups" button and it captures and stores the sample groups 
+    entered by the user. The groups are defined by dynamic inputs whose IDs and values are provided. If no valid values are provided, 
+    the function handles this scenario appropriately.
+
     Parameters:
-    n_clicks (int): The number of times the "update-groups" button has been clicked.
-    input_ids (list): A list of dictionaries containing the IDs of the dynamic inputs.
-    input_values (list): A list of values entered in the dynamic inputs.
-    
+    ----------
+    n_clicks : int
+        Number of times the "update-groups" button has been clicked.
+    input_ids : list
+        A list of dictionaries, each containing the ID of a dynamic input related to metabolite grouping.
+    input_values : list
+        A list of values entered in the dynamic inputs for metabolite grouping.
+
     Returns:
-    dict or None: A dictionary of grouped values or None if no valid values are provided.
-    """
+    -------
+    dict or None
+        A dictionary representing the grouped metabolite values; None if no valid values are provided.
+    '''
+    
     # Get the context to identify which input has triggered the callback
     ctx = callback_context  
     
@@ -289,15 +338,22 @@ def store_met_groups(n_clicks, input_ids, input_values):
     Input('store-met-groups', 'data')
 )
 def generate_data_order_selection(met_groups):
-    """
-    Generate columns, row data, and control the visibility of a placeholder message in a data order grid.
+    '''
+    Create a data order grid with column definitions, row data, and a placeholder message based on metabolite groups.
+    This function generates the necessary components for a data order selection grid. It takes into account the metabolite groups provided 
+    and prepares the grid columns and rows accordingly. Additionally, it manages the visibility of a placeholder message based on the data provided.
 
     Parameters:
-    met_groups (dict): Dictionary containing metabolite groups as keys and sample names as values.
+    ----------
+    met_groups : dict
+        A dictionary containing metabolite groups as keys and lists of sample names as values.
 
     Returns:
-    tuple: Contains column definitions, row data, and style for controlling the visibility of a placeholder message.
-    """
+    -------
+    tuple
+        A tuple that includes column definitions for the grid, row data based on the metabolite groups, 
+        and the style settings to control the visibility of a placeholder message in the grid.
+    '''
 
     if met_groups is None or not met_groups:  # Check if the input data is empty or None
         # If there's no data, no updates are made to the grid columns and rows, and the placeholder message is made visible
@@ -343,18 +399,28 @@ def generate_data_order_selection(met_groups):
     prevent_initial_update=True
 )
 def store_data_order_selection(n_clicks, met_groups, column_state, data):
-    """
-    Store and manage the order of data based on user interactions.
+    '''
+    Save and organize the data order based on user inputs and interactions with the grid.
+    This function is triggered by user actions, such as button clicks, and it processes the data order selections made in the grid. 
+    It considers the metabolite groups, the state of grid columns, and the current data in the grid to update and store the data order.
 
     Parameters:
-    - n_clicks (int): Number of button clicks.
-    - met_groups (dict): Dictionary containing metabolite groups.
-    - column_state (list): A list containing the state of the grid columns.
-    - data (list): A list containing the current data in the grid.
+    ----------
+    n_clicks : int
+        Number of times the relevant button has been clicked.
+    met_groups : dict
+        Dictionary containing the metabolite groups.
+    column_state : list
+        A list describing the state of the columns in the data grid.
+    data : list
+        The current data represented in the grid.
 
     Returns:
-    dict: Updated order of the data, or no_update.
-    """
+    -------
+    dict
+        The updated order of the data based on the user's selections; 'no_update' if there are no changes to be made.
+    '''
+    
     # Get context to identify which Input triggered the callback
     ctx = callback_context  
     
@@ -396,20 +462,24 @@ def store_data_order_selection(n_clicks, met_groups, column_state, data):
     Input('store-data-order', 'data')
 )
 def display_sample_group_order(stored_group_order):
-    """
+    '''
     Display sample groups in p-value settings modals and manage color inputs for each group.
-    
-    This function creates display elements showing the ordering of sample groups and color selection
-    inputs based on the provided group ordering data. The group information is utilized in different
-    parts of the application, specifically in p-value settings modals and for color customization in
+    This function generates HTML elements to display the ordering of sample groups and to provide 
+    color selection inputs based on the stored group order data. It is utilized in various parts of 
+    the application, particularly in p-value settings modals and for color customization in the 
     metabolomics pool data settings modal.
-    
+
     Parameters:
-    - stored_group_order (dict): A dictionary containing ordered groups of sample replicates.
-    
+    ----------
+    stored_group_order : dict
+        A dictionary containing the ordered groups of sample replicates.
+
     Returns:
-    - tuple: Tuple containing HTML Divs with sample group order information and color selection inputs.
-    """
+    -------
+    tuple
+        A tuple containing HTML Divs with sample group order information and color selection inputs 
+        for each group in the order they appear.
+    '''
     
     # Message to display when no group order information is available
     disclaimer_message = html.Div(
@@ -466,22 +536,28 @@ def display_sample_group_order(stored_group_order):
 ]
 )
 def manage_pvalue_dropdown_metabolomics(add_clicks, clear_clicks, stored_group_order, children):
-    """
-    Manage the dynamic addition and clearing of dropdowns for p-value comparisons for metabolomics data
-    in the p-value comparisons modal for bulk metabolomics.
-    
-    This function handles the addition of new dropdowns for selecting sample groups to compare 
-    when the "add" button is clicked, and clears all dropdowns when the "clear" button is clicked.
-    
+    '''
+    Handle dynamic dropdown management for p-value comparisons in metabolomics data.
+    This function is responsible for adding new dropdowns for sample group comparisons in response to "add" button clicks, 
+    and clearing all dropdowns upon "clear" button clicks within the p-value comparisons modal for bulk metabolomics. 
+    It uses the stored order of sample groups and the current state of dropdowns to update the interface accordingly.
+
     Parameters:
-    - add_clicks (int): Number of times the add button has been clicked.
-    - clear_clicks (int): Number of times the clear button has been clicked.
-    - stored_group_order (dict): Stored ordered groups of sample replicates.
-    - children (list): Existing children components within the dropdown container.
-    
+    ----------
+    add_clicks : int
+        Number of times the add button has been clicked.
+    clear_clicks : int
+        Number of times the clear button has been clicked.
+    stored_group_order : dict
+        Stored dictionary containing the ordered groups of sample replicates.
+    children : list
+        The existing children components within the dropdown container.
+
     Returns:
-    - list: Updated children components within the dropdown container.
-    """
+    -------
+    list
+        Updated list of children components within the dropdown container, reflecting the new state after the add or clear action.
+    '''
     
     ctx = callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -541,25 +617,31 @@ def manage_pvalue_dropdown_metabolomics(add_clicks, clear_clicks, stored_group_o
     prevent_initial_call=True
 )
 def store_p_value_metabolomics(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, stored_group_order):
-    """
+    '''
     Store the selected p-value comparisons and numerical p-value checkbox state for metabolomics data.
-    
-    This function gets the selected groups for p-value comparisons from the dropdowns,
-    the checkbox state for numerical p-values, and stores them for later use in 
-    add_p_value_annotations function. It ensures that no mirror combinations are stored, 
-    and only unique combinations of groups are kept.
-    
+    This function collects the selected groups for p-value comparisons from dropdowns, the state of the numerical p-value checkbox, 
+    and stores this information for later use in the 'add_p_value_annotations' function. It ensures that only unique combinations 
+    of groups are stored, avoiding mirror combinations.
+
     Parameters:
-    - n_clicks (int): Number of times the update button has been clicked.
-    - dropdown_values (list): Selected values from the first group of dropdowns.
-    - dropdown2_values (list): Selected values from the second group of dropdowns.
-    - numerical_pvalue (int, 1 if checked and 0 if not): State of the numerical p-value checkbox.
-    - stored_group_order (dict): Stored ordered groups of sample replicates.
-    
+    ----------
+    n_clicks : int
+        Number of times the update button has been clicked.
+    dropdown_values : list
+        Selected values from the first group of dropdowns for p-value comparison.
+    dropdown2_values : list
+        Selected values from the second group of dropdowns for p-value comparison.
+    numerical_pvalue : bool
+        State of the numerical p-value checkbox (True if checked, False if not).
+    stored_group_order : dict
+        Stored dictionary containing the ordered groups of sample replicates.
+
     Returns:
-    - dict: A dictionary containing the combinations of group indices for p-value comparisons and the numerical p-value checkbox state.
-    """
-    
+    -------
+    dict
+        A dictionary with the combinations of group indices for p-value comparisons and the state of the numerical p-value checkbox.
+    '''
+        
     if n_clicks > 0 and stored_group_order:
         
         # Verify that no selected dropdown value is None
@@ -603,22 +685,28 @@ def store_p_value_metabolomics(n_clicks, dropdown_values, dropdown2_values, nume
 ]
 )
 def manage_pvalue_dropdown_isotopologue_distribution(add_clicks, clear_clicks, stored_group_order, children):
-    """
-    Manage the dynamic addition and clearing of dropdowns for p-value comparisons for metabolomics data
-    in the p-value comparisons modal for bulk metabolomics.
-    
-    This function handles the addition of new dropdowns for selecting sample groups to compare 
-    when the "add" button is clicked, and clears all dropdowns when the "clear" button is clicked.
-    
+    '''
+    Handle dynamic dropdown management for p-value comparisons in isotopologue distribution data.
+    This function adds new dropdowns for selecting sample groups to compare upon "add" button clicks, and clears all dropdowns 
+    when the "clear" button is clicked, within the p-value comparisons modal for isotopologue distribution. It utilizes the stored 
+    group order data and the current dropdown components to update the user interface accordingly.
+
     Parameters:
-    - add_clicks (int): Number of times the add button has been clicked.
-    - clear_clicks (int): Number of times the clear button has been clicked.
-    - stored_group_order (dict): Stored ordered groups of sample replicates.
-    - children (list): Existing children components within the dropdown container.
-    
+    ----------
+    add_clicks : int
+        Number of times the add button has been clicked.
+    clear_clicks : int
+        Number of times the clear button has been clicked.
+    stored_group_order : dict
+        Stored dictionary containing the ordered groups of sample replicates.
+    children : list
+        The existing children components within the dropdown container.
+
     Returns:
-    - list: Updated children components within the dropdown container.
-    """
+    -------
+    list
+        Updated list of children components within the dropdown container, reflecting the new state after the add or clear action.
+    '''
     
     ctx = callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -678,24 +766,31 @@ def manage_pvalue_dropdown_isotopologue_distribution(add_clicks, clear_clicks, s
     prevent_initial_call=True
 )
 def store_p_value_isotopologue_distribution(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, stored_group_order):
-    """
-    Store the selected p-value comparisons and numerical p-value checkbox state for metabolomics data.
-    
-    This function gets the selected groups for p-value comparisons from the dropdowns,
-    the checkbox state for numerical p-values, and stores them for later use in 
-    add_p_value_annotations function. It ensures that no mirror combinations are stored, 
-    and only unique combinations of groups are kept.
-    
+    '''
+    Store the selected p-value comparisons and numerical p-value checkbox state for isotopologue distribution data.
+
+    This function retrieves the selected groups for p-value comparisons from dropdowns, along with the state of the numerical p-value checkbox, 
+    and stores this information for later use in the 'add_p_value_annotations' function for isotopologue distribution data. It ensures that only unique 
+    combinations of groups are stored, excluding mirror combinations.
+
     Parameters:
-    - n_clicks (int): Number of times the update button has been clicked.
-    - dropdown_values (list): Selected values from the first group of dropdowns.
-    - dropdown2_values (list): Selected values from the second group of dropdowns.
-    - numerical_pvalue (int, 1 if checked and 0 if not): State of the numerical p-value checkbox.
-    - stored_group_order (dict): Stored ordered groups of sample replicates.
-    
+    ----------
+    n_clicks : int
+        Number of times the update button has been clicked.
+    dropdown_values : list
+        Selected values from the first set of dropdowns for p-value comparison.
+    dropdown2_values : list
+        Selected values from the second set of dropdowns for p-value comparison.
+    numerical_pvalue : bool
+        State of the numerical p-value checkbox (True if checked, False if not).
+    stored_group_order : dict
+        Stored dictionary containing the ordered groups of sample replicates.
+
     Returns:
-    - dict: A dictionary containing the combinations of group indices for p-value comparisons and the numerical p-value checkbox state.
-    """
+    -------
+    dict
+        A dictionary containing the combinations of group indices for p-value comparisons and the state of the numerical p-value checkbox.
+    '''
     
     if n_clicks > 0 and stored_group_order:
         
@@ -1190,28 +1285,36 @@ def store_settings_isotopologue_distribution(n_clicks,
     prevent_initial_call = True
 )
 def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomics, volcano, met_normalization):
-    """
-    Callback function to display selected normalization methods for various plots in a Dash application.
+    '''
+    Display selected normalization variables for various plots in a Dash application.
 
-    This function is triggered by the click of any of the four specified buttons in a Dash app. It checks 
-    which button was clicked and displays the selected normalization methods for the corresponding plot. 
-    The function also handles cases where no normalization methods are selected or when the metadata is not provided.
+    This callback function is activated by the click of any of the four specified buttons in the Dash app. 
+    It identifies which button was clicked and shows the chosen normalization variables for the relevant plot. 
 
     Parameters:
-    - bulk_heatmap (int): Number of clicks on the 'generate-bulk-heatmap-plot' button.
-    - custom_heatmap (int): Number of clicks on the 'generate-custom-heatmap-plot' button.
-    - bulk_metabolomics (int): Number of clicks on the 'generate-metabolomics' button.
-    - volcano (int): Number of clicks on the 'generate-volcano-plot' button.
-    - met_normalization (dict): A dictionary containing the 'selected_values' key with a list of selected normalization methods.
+    ----------
+    bulk_heatmap : int
+        Number of clicks on the 'generate-bulk-heatmap-plot' button.
+    custom_heatmap : int
+        Number of clicks on the 'generate-custom-heatmap-plot' button.
+    bulk_metabolomics : int
+        Number of clicks on the 'generate-metabolomics' button.
+    volcano : int
+        Number of clicks on the 'generate-volcano-plot' button.
+    met_normalization : dict
+        A dictionary containing the 'selected_values' key with a list of selected normalization methods.
 
     Returns:
-    - Tuple of Dash components: Each element of the tuple corresponds to the content to be displayed in the 
-      respective 'normalization-display-container-*' component. Only the component corresponding to the clicked 
-      button is updated with the selected normalization methods, while others are set to a default empty display.
+    -------
+    Tuple of Dash components
+        A tuple where each element corresponds to the content displayed in the respective 'normalization-display-container-*' component. 
+        The content is updated with the selected normalization methods for the corresponding plot.
 
     Raises:
-    - PreventUpdate: If no button has been clicked or if no normalization method is selected.
-    """    
+    -------
+    PreventUpdate
+        If no button has been clicked or if no normalization method is selected.
+    '''
     
     ctx = callback_context
     

@@ -13,20 +13,25 @@ from layout.utilities_security import process_pool_data, process_iso_data
     State('upload-data', 'filename')
 )
 def store_metabolomics_pool_data(contents, filename):
-    """
-    Callback function to store the processed metabolomics pool data.
-    
-    This function takes the contents and filename of an uploaded file as inputs, processes the data
-    using the `process_pool_data` function, and stores the resulting JSON string in a Dash Store component
-    for later use.
-    
+    '''
+    Process and store the metabolomics pool data from an uploaded file.
+    This callback function takes the contents and filename of an uploaded file, processes the data 
+    using the `process_pool_data` function, and then stores the processed data in JSON format in a Dash Store component 
+    for later use in the application.
+
     Parameters:
-    contents (str): The content of the uploaded file as a base64 encoded string.
-    filename (str): The name of the uploaded file.
-    
+    ----------
+    contents : str
+        The content of the uploaded file, encoded as a base64 string.
+    filename : str
+        The name of the uploaded file.
+
     Returns:
-    str: A JSON string representing the processed pool data if the uploaded file has contents, else None.
-    """
+    -------
+    str
+        A JSON-formatted string representing the processed pool data, if the uploaded file contains data; 
+        returns None if the file is empty or not properly uploaded.
+    '''
     
     # Check if the uploaded file has contents
     if contents:
@@ -46,22 +51,27 @@ def store_metabolomics_pool_data(contents, filename):
     State('upload-data', 'filename')
 )
 def store_metabolomics_iso_data(contents, stored_pool_data, filename):
-    """
-    Callback function to store the processed metabolomics isotopic data.
-    
-    This function takes the contents and filename of an uploaded file, along with previously stored pool data,
-    as inputs. It processes the isotopic data using the `process_iso_data` function and stores the resulting 
-    JSON string in a Dash Store component for later use.
-    
+    '''
+    Process and store the metabolomics isotopic data from an uploaded file.
+    This callback function takes the contents and filename of an uploaded file and 
+    previously stored pool data as inputs. It processes the isotopic data using the `process_iso_data` function and 
+    stores the processed data in JSON format in a Dash Store component for later use in the application.
+
     Parameters:
-    contents (str): The content of the uploaded file as a base64 encoded string.
-    stored_pool_data (str): JSON string representing the previously stored pool data.
-    filename (str): The name of the uploaded file.
-    
+    ----------
+    contents : str
+        The content of the uploaded file, encoded as a base64 string.
+    stored_pool_data : str
+        JSON-formatted string of the previously stored pool data.
+    filename : str
+        The name of the uploaded file.
+
     Returns:
-    str: A JSON string representing the processed isotopic data if the uploaded file and stored pool data 
-         are present, else None.
-    """
+    -------
+    str
+        A JSON-formatted string representing the processed isotopic data, if the uploaded file and stored pool data are valid; 
+        returns None if either the file is empty, not properly uploaded, or the pool data is not available.
+    '''
     
     # Check if the uploaded file and stored pool data are present
     if contents and stored_pool_data:
@@ -84,20 +94,26 @@ def store_metabolomics_iso_data(contents, stored_pool_data, filename):
     State('upload-data', 'filename')
 )
 def update_upload_status(stored_pool_data, stored_iso_data, filename):
-    """
-    Callback function to update the upload status and display the uploaded filename.
-    
-    This function takes the stored pool and isotopologue data, as well as the filename of the uploaded file,
-    to generate appropriate upload status messages and display the filename.
-    
+    '''
+    Update and display the upload status and filename of uploaded files.
+    This callback function uses the stored pool data, isotopologue data, and the filename of an uploaded file 
+    to generate status messages about the upload process. It then prepares these messages and the filename 
+    for display in the application's interface.
+
     Parameters:
-    stored_pool_data (str): JSON string representing the stored pool data.
-    stored_iso_data (str): JSON string representing the stored isotopologue data.
-    filename (str): The name of the uploaded file.
-    
+    ----------
+    stored_pool_data : str
+        JSON-formatted string representing the stored metabolomics pool data.
+    stored_iso_data : str
+        JSON-formatted string representing the stored isotopologue data.
+    filename : str
+        The name of the most recently uploaded file.
+
     Returns:
-    tuple: A tuple containing HTML components or strings to display the upload status and filename.
-    """
+    -------
+    tuple
+        A tuple containing HTML components or strings, which are used to display the upload status and filename in the application.
+    '''
     
     # Check if there's no uploaded pool data
     if stored_pool_data is None:
