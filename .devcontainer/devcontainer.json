@@ -1,6 +1,0 @@
-{
-    "name": "Python 3.12.0 Environment",
-    "build.dockerfile": "Dockerfile",
-    "forwardPorts": [],
-    "remoteUser": "root"
-}
