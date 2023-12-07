@@ -409,7 +409,7 @@ def display_custom_heatmap_plot(n_clicks, pool_data, met_normalization, met_grou
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
     
     # Execute the function only if the generate button is clicked and necessary data is available
-    if triggered_id == 'generate-custom-heatmap-plot' and n_clicks > 0:
+    if triggered_id == 'generate-custom-heatmap-plot':
         # Check if there is any uploaded valid metabolomics data        
         if pool_data is None:
             return no_update, no_update, generate_toast("error", 
