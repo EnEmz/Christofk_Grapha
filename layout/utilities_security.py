@@ -149,7 +149,7 @@ def process_pool_data(contents, filename, compound_column_name="Compound"):
     df_pool = clean_column_headers(df_pool)
     df_pool = clean_compound_column(df_pool, compound_column_name)
     
-    # Additional processing specific to pool data can be added here.
+
     return df_pool.to_json(date_format='iso', orient='split')
 
 
@@ -180,6 +180,14 @@ def process_iso_data(contents, filename, stored_pool_data, compound_column_name=
     df_iso = clean_column_headers(df_iso)
     df_iso = clean_compound_column(df_iso, compound_column_name)
     
-    # Additional processing specific to isotopic data can be added here.
+    # Check if 'C_Label' column exists and all its values are 0 or NaN
+    if 'C_Label' in df_iso.columns:
+        if df_iso['C_Label'].isna().all() or (df_iso['C_Label'] == 0).all():
+            return None
+
+        else:
+            return df_iso.to_json(date_format='iso', orient='split')
+        
+    else:
+        return None
     
-    return df_iso.to_json(date_format='iso', orient='split')
