@@ -1,2 +1,2 @@
-echo '.grapha/' >> .gitignore
-echo '.venv/' >> .gitignore
+.grapha/
+.venv/
