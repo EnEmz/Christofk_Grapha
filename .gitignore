@@ -1,0 +1,2 @@
+echo '.grapha/' >> .gitignore
+echo '.venv/' >> .gitignore
