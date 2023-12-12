@@ -2,22 +2,20 @@
 
 import pandas as pd
 import os
+import sys
 
 from layout.utilities_layout import generate_classes_checklist_options_with_met_names
 
-# Get the current working directory
-current_directory = os.getcwd()
+# Correctly setting up the path to the 'metabolite_classes.csv' file
+base_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # This navigates up two levels
+csv_file_path = os.path.join(base_directory, 'metabolite_classes.csv')
 
-# Filename of the metabolite classes file
-filename = "metabolite_classes.csv"
-
-# Construct the full path to metabolite classes file
-path_met_pathway_list = os.path.join(current_directory, filename)
+# Now you can read the CSV file without any path issues
+df_met_group_list = pd.read_csv(csv_file_path)
 
 # Insert your preselected options for the normalization of the pool data
 normalization_preselected = ['trifluoromethanesulfonate', 'quantity/sample']
 
-df_met_group_list = pd.read_csv(path_met_pathway_list)
 df_met_group_list = df_met_group_list.drop_duplicates(keep='first').dropna(how='all')
 
 # For metabolite classes selection in modal
