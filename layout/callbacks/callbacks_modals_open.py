@@ -7,124 +7,107 @@ from dash import callback_context
 from app import app
 
 
-@app.callback(
-[
-    Output('modal-classes', 'is_open'),
-    Output('modal-normalization', 'is_open'),
-    Output('modal-met-groups', 'is_open'),
-    Output('modal-data-order', 'is_open'),
-    Output('modal-settings-bulk-heatmap', 'is_open'),
-    Output('modal-settings-bulk-isotopologue-heatmap', 'is_open'),
-    Output('modal-settings-custom-heatmap', 'is_open'),
-    Output('modal-settings-metabolomics', 'is_open'),
-    Output('modal-settings-istopomer-distribution', 'is_open'),
-    Output('modal-settings-volcano', 'is_open'),
-    Output('modal-p-value-metabolomics', 'is_open'),
-    Output('modal-p-value-isotopologue-distribution', 'is_open')
-],
-[
-    Input('open-classes', 'n_clicks'),
-    Input('open-normalization', 'n_clicks'),
-    Input('open-met-groups', 'n_clicks'),
-    Input('open-data-order', 'n_clicks'),
-    Input('change-settings-bulk-heatmap', 'n_clicks'),
-    Input('change-settings-bulk-isotopologue-heatmap', 'n_clicks'),
-    Input('change-settings-custom-heatmap', 'n_clicks'),
-    Input('change-settings-metabolomics', 'n_clicks'),
-    Input('change-settings-isotopologue-distribution', 'n_clicks'),
-    Input('change-settings-volcano', 'n_clicks'),
-    Input('configure-p-value-metabolomics', 'n_clicks'),
-    Input('configure-p-value-isotopologue-distribution', 'n_clicks'),
-    Input('update-classes', 'n_clicks'),
-    Input('update-normalization', 'n_clicks'),
-    Input('update-groups', 'n_clicks'),
-    Input('update-data-order', 'n_clicks'),
-    Input('update-settings-bulk-heatmap', 'n_clicks'),
-    Input('update-settings-bulk-isotopologue-heatmap', 'n_clicks'),
-    Input('update-settings-custom-heatmap', 'n_clicks'),
-    Input('update-settings-metabolomics', 'n_clicks'),
-    Input('update-settings-isotopologue-distribution', 'n_clicks'),
-    Input('update-settings-volcano', 'n_clicks'),
-    Input('update-p-value-metabolomics', 'n_clicks'),
-    Input('update-p-value-isotopologue-distribution', 'n_clicks')
-],
-[
-    State('modal-classes', 'is_open'),
-    State('modal-normalization', 'is_open'),
-    State('modal-met-groups', 'is_open'),
-    State('modal-data-order', 'is_open'),
-    State('modal-settings-bulk-heatmap', 'is_open'),
-    State('modal-settings-bulk-isotopologue-heatmap', 'is_open'),
-    State('modal-settings-custom-heatmap', 'is_open'),
-    State('modal-settings-metabolomics', 'is_open'),
-    State('modal-settings-istopomer-distribution', 'is_open'),
-    State('modal-settings-volcano', 'is_open'),
-    State('modal-p-value-metabolomics', 'is_open'),
-    State('modal-p-value-isotopologue-distribution', 'is_open')
-],
-)
-def toggle_modal(*args):
-    '''
-    Toggle the visibility of various modals in response to button clicks.
-    This function uses a variable-length argument list to determine the current state and input 
-    of different UI elements, and accordingly adjusts the visibility of various modals.
+def map_button_to_modal():
+    """
+    Maps modal IDs to their corresponding button IDs. Each modal is associated with multiple buttons.
+    """
+    
+    return {
+        'modal-classes': ['open-classes', 'update-classes'],
+        'modal-normalization': ['open-normalization', 'update-normalization'],
+        'modal-met-groups': ['open-met-groups', 'update-groups'],
+        'modal-data-order': ['open-data-order', 'update-data-order'],
+        
+        'modal-settings-bulk-heatmap': ['change-settings-bulk-heatmap', 'update-settings-bulk-heatmap'],
+        'modal-settings-bulk-isotopologue-heatmap': ['change-settings-bulk-isotopologue-heatmap', 'update-settings-bulk-isotopologue-heatmap'],
+        'modal-settings-custom-heatmap': ['change-settings-custom-heatmap', 'update-settings-custom-heatmap'],
+        'modal-settings-metabolomics': ['change-settings-metabolomics', 'update-settings-metabolomics'],
+        'modal-settings-istopomer-distribution': ['change-settings-isotopologue-distribution', 'update-settings-isotopologue-distribution'],
+        'modal-settings-volcano': ['change-settings-volcano', 'update-settings-volcano'],
+        'modal-settings-lingress': ['change-settings-lingress', 'update-settings-lingress'],
+        
+        'modal-p-value-metabolomics': ['configure-p-value-metabolomics', 'update-p-value-metabolomics'],
+        'modal-p-value-isotopologue-distribution': ['configure-p-value-isotopologue-distribution', 'update-p-value-isotopologue-distribution']
+    }
+
+def manage_modal_state(current_states, triggered_button):
+    """
+    Manages the state of modals based on the button clicked.
 
     Parameters:
     ----------
-    *args
-        Variable length argument list containing the Inputs and States relevant to the modal visibility.
+    current_states: dict
+        Current state of all modals.
+    triggered_button: str
+        ID of the button that triggered the callback.
+
+    Returns:
+    -------
+    dict
+        Updated state of all modals.
+    """
+    
+    button_modal_mapping = {button: modal for modal, buttons in map_button_to_modal().items() for button in buttons}
+    updated_states = current_states.copy()
+
+    if triggered_button in button_modal_mapping:
+        modal_id = button_modal_mapping[triggered_button]
+        updated_states[modal_id] = not current_states[modal_id]
+
+    return updated_states
+
+
+@app.callback(
+    [Output(modal_id, 'is_open') for modal_id in map_button_to_modal().keys()],
+    [Input(button_id, 'n_clicks') for button_list in map_button_to_modal().values() for button_id in button_list],
+    [State(modal_id, 'is_open') for modal_id in map_button_to_modal().keys()],
+)
+def toggle_modal(*args):
+    """
+    Toggles the open state of various modals in a Dash application.
+
+    This function is triggered by a set of button clicks, each associated with a modal. It determines
+    which button was clicked and toggles the open state of the corresponding modal. If no button
+    has been clicked, it returns the current state of all modals.
+
+    The function handles a dynamic number of modals and buttons, which are defined in the 
+    `map_button_to_modal` function. This allows for easy extension of the application with new modals 
+    and buttons without changing the core logic of this function.
+
+    Parameters:
+    ----------
+    *args : tuple
+        A variable-length argument list. The first part of `args` contains the states of the buttons
+        (number of clicks), and the second part contains the states of the modals (whether each is open or closed).
 
     Returns:
     -------
     tuple
-        A tuple of boolean values, each representing the visibility state of a corresponding modal.
-    '''
+        A tuple of boolean values, each representing the open/closed state of a corresponding modal.
+
+    Note:
+    -----
+    - The callback context of Dash is used to determine which button was clicked.
+    - The structure of the `args` tuple is dependent on the number and order of Inputs and States
+      defined in the `@app.callback` decorator of this function.
+    """
     
-    ctx = callback_context  # Get callback context
-    
+    ctx = callback_context
+
+    # Number of buttons (inputs)
+    num_buttons = len([button_id for button_list in map_button_to_modal().values() for button_id in button_list])
+
     # If no button has been clicked, return the current state of all modals
     if not ctx.triggered:
-        return args[24:]
-    else:
-        button_id = ctx.triggered[0]['prop_id'].split('.')[0]  # Get the id of the clicked button
+        return args[num_buttons:]
+    
+    # Get the id of the clicked button
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    # Current visibility state of all modals
+    current_modal_states = {modal_id: state for modal_id, state in zip(map_button_to_modal().keys(), args[num_buttons:])}
 
-    modals_open = list(args[24:])  # Current visibility state of all modals
+    # Update the modal states
+    updated_modal_states = manage_modal_state(current_modal_states, button_id)
 
-    # Mapping of button ids to their corresponding modal indices
-    modal_mapping = {
-        'open-classes': 0,
-        'open-normalization': 1,
-        'open-met-groups': 2,
-        'open-data-order': 3,
-        'change-settings-bulk-heatmap': 4,
-        'change-settings-bulk-isotopologue-heatmap': 5,
-        'change-settings-custom-heatmap': 6,
-        'change-settings-metabolomics': 7,
-        'change-settings-isotopologue-distribution': 8,
-        'change-settings-volcano': 9,
-        'configure-p-value-metabolomics': 10,
-        'configure-p-value-isotopologue-distribution': 11,
-        'update-classes': 0,
-        'update-normalization': 1,
-        'update-groups': 2,
-        'update-data-order': 3,
-        'update-settings-bulk-heatmap': 4,
-        'update-settings-bulk-isotopologue-heatmap': 5,
-        'update-settings-custom-heatmap': 6,
-        'update-settings-metabolomics': 7,
-        'update-settings-isotopologue-distribution': 8,
-        'update-settings-volcano': 9,
-        'update-p-value-metabolomics': 10,
-        'update-p-value-isotopologue-distribution': 11
-    }
-
-    # If an update button was clicked, close the corresponding modal
-    if button_id.startswith('update-'):
-        modals_open[modal_mapping[button_id]] = False
-    else:  
-        # Toggle the visibility of the corresponding modal
-        modals_open[modal_mapping[button_id]] = not modals_open[modal_mapping[button_id]]
-
-    return tuple(modals_open)  # Return the updated visibility state of all modals
-
-
+    return tuple(updated_modal_states.values())
