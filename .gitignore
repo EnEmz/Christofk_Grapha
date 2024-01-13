@@ -1,3 +1,4 @@
 .grapha/
 .venv/
 _Work Data/
+__pycache__

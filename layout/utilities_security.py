@@ -192,7 +192,7 @@ def process_iso_data(contents, filename, stored_pool_data, compound_column_name=
         return None
     
     
-def process_external_variable_data(contents, filename, stored_pool_data, variable_column_name="Variable"):
+def process_lingress_data(contents, filename, stored_pool_data, variable_column_name="Variable"):
     """
     Processes external variable data from an uploaded Excel file against previously stored pool data to see if it is viable. 
     This function ensures consistency and correctness of the external variable data according to the pool data format and columns
@@ -207,3 +207,36 @@ def process_external_variable_data(contents, filename, stored_pool_data, variabl
     Returns:
         str: A JSON string representing the processed isotopic DataFrame if all validation checks pass, or None if 'Normalized' sheet is not present.
     """
+    
+    decoded_content = decode_contents(contents)
+    
+    try:
+        df_pool = read_excel_file(decoded_content, 'PoolAfterDF')
+    except ValueError:
+        # If 'PoolAfterDF' sheet is not found in the Excel file, return None
+        # No pool data found in the uploaded sheet
+        return None
+
+    try:
+        df_lingress = read_excel_file(decoded_content, 'Lingress')
+    except ValueError:
+        # If 'Lingress' sheet is not found in the Excel file, return None
+        return None
+    
+    df_pool = clean_column_headers(df_pool)
+    df_lingress = clean_column_headers(df_lingress)
+    
+    # Exclude the first column and get the remaining column names for both DataFrames
+    pool_columns = set(df_pool.columns[1:])
+    lingress_columns = set(df_lingress.columns[1:])
+
+    # Compare the sets of column names
+    if pool_columns == lingress_columns:
+        df_lingress.to_json(date_format='iso', orient='split')
+        
+    else:
+        return None
+    
+    
+    
+    

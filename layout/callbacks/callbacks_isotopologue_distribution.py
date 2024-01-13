@@ -10,7 +10,6 @@ from dash.exceptions import PreventUpdate
 from app import app
 from layout.toast import generate_toast
 from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution
-from layout.config import iso_color_palette
 
 @app.callback(
     Output('isotopologue-distribution-dropdown', 'options'),
@@ -96,12 +95,6 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
     list
         A list containing dcc.Graph objects for the isotopologue distribution plot.
     '''
-    
-    # Constants for bar widths and gaps in the plot
-    BAR_WIDTH = 0.15
-    BAR_GAP = 0.03
-    GROUP_GAP = 0.085
-    C_LABEL_AXIS_CONST = 0.04
     
     ctx = callback_context  # Get callback context to identify which input has triggered the callback
     

@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 from dash import html
 
 from app import app
-from layout.utilities_security import process_pool_data, process_iso_data
+from layout.utilities_security import process_pool_data, process_iso_data, process_lingress_data
 
 
 @app.callback(
@@ -83,6 +83,47 @@ def store_metabolomics_iso_data(contents, stored_pool_data, filename):
 
 
 @app.callback(
+    Output('store-settings-lingress'),
+    [
+    Input('upload-data', 'contents'),
+    Input('store-data-pool', 'data')
+],  
+    State('upload-data', 'filename')
+)
+def store_lingress_data(contents, stored_pool_data, filename):
+    '''
+    Process and store external variable data for linear regression with metabolomics.
+    This callback function takes the contents and filename of an uploaded file and 
+    previously stored pool data as inputs. It processes the external variable data using the `process_lingress_data` function and 
+    stores the processed data in JSON format in a Dash Store component for later use in the application.
+
+    Parameters:
+    ----------
+    contents : str
+        The content of the uploaded file, encoded as a base64 string.
+    stored_pool_data : str
+        JSON-formatted string of the previously stored pool data.
+    filename : str
+        The name of the uploaded file.
+
+    Returns:
+    -------
+    str
+        A JSON-formatted string representing the processed external variable data for linear regression,
+        if the uploaded file and stored pool data are valid; 
+        returns None if either the file is empty, not properly uploaded, or the pool data is not available.
+    '''
+    
+    # Check if the uploaded file and stored pool data are present
+    if contents and stored_pool_data:
+        # If both are present, process the external variable data and return the JSON representation
+        return process_lingress_data(contents, filename, stored_pool_data)
+    
+    # If either the uploaded file or stored pool data is missing, return None
+    return None
+
+
+@app.callback(
 [
     Output('upload-status-display', 'children'),
     Output('uploaded-filename-display', 'children')
@@ -128,7 +169,7 @@ def update_upload_status(stored_pool_data, stored_iso_data, filename):
         return html.Span('Pool data successfully uploaded', style={'color': 'green'}), filename_display
     elif stored_pool_data is not None and stored_iso_data is not None:
         # Case: Both pool and isotopic data are uploaded
-        return html.Span('Both pool and isotopologue data successfully uploaded', style={'color': 'green'}), filename_display
+        return html.Span('Pool and isotopologue data successfully uploaded', style={'color': 'green'}), filename_display
     else:
         # Case: Unexpected error
         print("There was an unexpected error when updating filename status!")

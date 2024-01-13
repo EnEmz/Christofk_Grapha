@@ -1492,10 +1492,6 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
                 hovertext=hover_text
             ))
             
-            
-            
-    
-    
     # Updating layout of the Plotly graph
     fig.update_layout(
         barmode='group',
@@ -1588,6 +1584,7 @@ def add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, a
             add_pvalue_shapes_and_annotations(fig, index, [x_coord1, x_coord2], symbol, settings, y_range, adjusted_text_offset, color)
 
     return fig
+        
         
 def calculate_x_coordinate_for_label(label_index, group_key, grouped_samples, settings):
     """
