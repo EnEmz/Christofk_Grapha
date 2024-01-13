@@ -16,7 +16,8 @@ def get_tabs_parent():
                 get_tab_custom_heatmap(),
                 get_tab_bulk_metabolomics(),
                 get_tab_isotopologue_distribution(),
-                get_tab_volcano()
+                get_tab_volcano(),
+                get_tab_lingress()
             ]
     )
     
@@ -278,20 +279,20 @@ def get_tab_volcano():
             dbc.Row([
                 dbc.Col(
                     create_button("Mark Significant Points",
-                                            "volcano-click-significant-points",
-                                            color="info"),
+                                  "volcano-click-significant-points",
+                                  color="info"),
                     className='just-a-button'
                 ),
                 dbc.Col(
                     create_button("Generate Volcano Plot",
-                                            "generate-volcano-plot",
-                                            color="success"),
+                                  "generate-volcano-plot",
+                                  color="success"),
                     className='just-a-button'
                 ),
                 dbc.Col(
                     create_button("Change Volcano Settings",
-                                            "change-settings-volcano",
-                                            color="secondary"),
+                                  "change-settings-volcano",
+                                  color="secondary"),
                     className='just-a-button'
                 )
             ],
@@ -301,8 +302,8 @@ def get_tab_volcano():
             dbc.Row([
                 dbc.Col(
                     create_dropdown_with_label("Search for a Metabolite in the Volcano Plot",
-                                                         "volcano-search-dropdown",
-                                                         placeholder="Search or Select a metabolite name"),
+                                               "volcano-search-dropdown",
+                                               placeholder="Search or Select a metabolite name"),
                 width=3)
             ],
             justify='center',
@@ -321,5 +322,49 @@ def get_tab_volcano():
             ],
             justify='center',
             align='center')
+        ]
+    )
+    
+
+def get_tab_lingress():
+    return dbc.Tab(
+        label='Linear Regression',
+        children=[
+            dbc.Row([
+                dbc.Col(
+                    create_dropdown_with_label("Select an External Variable for Linear Regression Correlation to Metabolomics Data",
+                                               "lingress-variable-dropdown"),
+                width=3),
+            ],
+            justify='center',
+            align='center'),
+            
+            dbc.Row([
+                dbc.Col(
+                    create_button("Generate Linear Regression Plots",
+                                  "generate-lingress",
+                                  color="success"),
+                    className='just-a-button'
+                ),
+                dbc.Col(
+                    create_button("Change Linear Regression Plot Settings",
+                                  "change-settings-lingress",
+                                  color="info"),
+                    className='just-a-button'
+                ),
+            ]),
+            
+            html.Div(id='normalization-display-container-lingress', className='normalization-display'),
+            
+            html.Div(
+                id="loader-wrapper-lingress", 
+                children=[
+                    dcc.Loading(id='loading-lingress',
+                                type='circle',
+                                fullscreen=False,
+                                # Container for the bulk metabolomics plots
+                                children=html.Div(id='lingress-plot-container')
+                    )
+            ])
         ]
     )

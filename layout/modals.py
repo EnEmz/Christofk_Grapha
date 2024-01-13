@@ -24,6 +24,7 @@ def build_modal_components():
     modal_components.append(get_settings_modal_metabolomics())
     modal_components.append(get_settings_modal_iso_distribution())
     modal_components.append(get_settings_modal_volcano())
+    modal_components.append(get_settings_modal_lingress())
     
     return modal_components
 
@@ -1121,3 +1122,19 @@ def get_pvalue_modal_isotopologue_distribution():
                 is_open=False,
                 backdrop="static"
             )
+    
+    
+def get_settings_modal_lingress():
+    return dbc.Modal(
+        [
+            dbc.ModalHeader("Something to work on."),
+            
+            dbc.ModalFooter(
+                dbc.Button("Update", id="update-settings-lingress", n_clicks=0, color="success")
+            )
+        ],
+        id="modal-settings-lingress",
+        size='xl',
+        is_open=False,
+        backdrop="static"
+    )

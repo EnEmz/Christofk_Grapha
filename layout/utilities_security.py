@@ -191,3 +191,19 @@ def process_iso_data(contents, filename, stored_pool_data, compound_column_name=
     else:
         return None
     
+    
+def process_external_variable_data(contents, filename, stored_pool_data, variable_column_name="Variable"):
+    """
+    Processes external variable data from an uploaded Excel file against previously stored pool data to see if it is viable. 
+    This function ensures consistency and correctness of the external variable data according to the pool data format and columns
+    that could be used for linear regression external variable correlation to .
+
+    Parameters:
+        contents (str): Content of the uploaded file in base64 format.
+        filename (str): Original name of the uploaded file for reference.
+        stored_pool_data (str): A JSON string representing previously stored pool data.
+        compound_column_name (str): Name of the column to check for in the isotopic data.
+
+    Returns:
+        str: A JSON string representing the processed isotopic DataFrame if all validation checks pass, or None if 'Normalized' sheet is not present.
+    """

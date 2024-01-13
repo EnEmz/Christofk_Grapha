@@ -14,6 +14,7 @@ def build_storage_components():
     # 'local' meaning it will keep data stored until browser is closed
     storage_components.append(get_storage('store-data-pool', 'local'))
     storage_components.append(get_storage('store-data-iso', 'local'))
+    storage_components.append(get_storage('store-data-lingress'))
     
     # For user selection
     storage_components.append(get_storage('store-data-order'))
@@ -28,6 +29,7 @@ def build_storage_components():
     storage_components.append(get_storage('store-settings-metabolomics'))
     storage_components.append(get_storage('store-settings-isotopologue-distribution'))
     storage_components.append(get_storage('store-volcano-settings'))
+    storage_components.append(get_storage('store-lingress-settings'))
     
     # For plots
     storage_components.append(get_storage('store-bulk-heatmap-plot'))
