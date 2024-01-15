@@ -79,8 +79,6 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         pool_json_file = io.StringIO(pool_data)
         df_pool = pd.read_json(pool_json_file, orient='split')
         
-        
-        
         # Initialize bool variable to check if isotopologue data is present
         df_iso = None
         

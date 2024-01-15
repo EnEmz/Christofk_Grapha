@@ -302,3 +302,16 @@ margin: 5px;
     margin-top: 40px;
     margin-left: 10px;
 }
+
+.stats-container {
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    width: 100%
+}

@@ -29,7 +29,7 @@ def build_storage_components():
     storage_components.append(get_storage('store-settings-metabolomics'))
     storage_components.append(get_storage('store-settings-isotopologue-distribution'))
     storage_components.append(get_storage('store-volcano-settings'))
-    storage_components.append(get_storage('store-lingress-settings'))
+    storage_components.append(get_storage('store-settings-lingress'))
     
     # For plots
     storage_components.append(get_storage('store-bulk-heatmap-plot'))

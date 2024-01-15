@@ -92,7 +92,7 @@ def store_metabolomics_iso_data(contents, stored_pool_data, filename):
 )
 def store_lingress_data(contents, stored_pool_data, filename):
     '''
-    Process and store external variable data for linear regression with metabolomics.
+    Process and store external variable data for linear regression with metabolomics data.
     This callback function takes the contents and filename of an uploaded file and 
     previously stored pool data as inputs. It processes the external variable data using the `process_lingress_data` function and 
     stores the processed data in JSON format in a Dash Store component for later use in the application.

@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from scipy import stats
+from scipy.stats import linregress
 
 from layout.config import iso_color_palette
 from layout.config import df_met_group_list
@@ -1612,3 +1613,64 @@ def calculate_x_coordinate_for_label(label_index, group_key, grouped_samples, se
     group_center_offset = ((group_index - total_groups / 2) * (settings['barwidth'] + settings['bargap']) + bar_width_half + 0.05)
     
     return base_x + group_center_offset
+
+
+def generate_single_lingress_plot(df_met_data, df_var_data, settings):
+    """
+    Generates a linear regression plot for a given metabolite against an external variable using Plotly Graph Objects.
+    
+    Parameters:
+    df_met_data : pd.DataFrame
+        DataFrame containing metabolomics data with one of the columns being the metabolite of interest.
+    df_var_data : pd.DataFrame
+        DataFrame containing the external variable data with one of the columns being the variable of interest.
+    settings : dict
+        Settings for the plot, such as 'barwidth' and 'bargap'.
+
+    Returns:
+    go.Figure
+        A Plotly Graph Object figure of the linear regression plot.
+    dict
+        Dictionary containing regression statistics (slope, intercept, r_value, p_value, std_err).
+    """
+    
+    # Extract the metabolite and variable names
+    met_name = df_met_data['Compound'].iloc[0]
+    var_name = df_var_data['Variable'].iloc[0]
+    
+    # Extract the relevant data only
+    met_values = df_met_data.iloc[0, 2:].astype(float)
+    var_values = df_var_data.iloc[0, 1:].astype(float)
+    
+    # Filter out NaN values and ensure equal lengths
+    valid_indices = (~var_values.isna()) & (~met_values.isna())
+    var_values_filtered = var_values[valid_indices]
+    met_values_filtered = met_values[valid_indices]
+    
+    # Perform linear regression
+    slope, intercept, r_value, p_value, std_err = linregress(var_values_filtered, met_values_filtered)
+
+    # Create a scatter plot with a regression line
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=var_values_filtered, y=met_values_filtered, mode='markers', name='Data'))
+    fig.add_trace(go.Scatter(x=var_values_filtered, y=intercept + slope * var_values_filtered, mode='lines', name='Fit'))
+
+    fig.update_layout(
+        xaxis_title=var_name,
+        yaxis_title=met_name,
+        autosize=False,
+        width=600,
+        height=400
+    )
+
+    # Regression statistics
+    stats = {
+        'slope': slope,
+        'intercept': intercept,
+        'r_value': r_value,
+        'p_value': p_value,
+        'std_err': std_err,
+        'r_squared': r_value**2
+    }
+
+    return fig, stats

@@ -3,4 +3,6 @@
 _Work Data/
 __pycache__
 ~$data_w_isotopologues.xlsx
+~$data_pool_only.xlsx
+~$data_w_isotopologues_and_lingress.xlsx
 .DS_Store

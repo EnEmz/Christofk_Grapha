@@ -227,8 +227,8 @@ def process_lingress_data(contents, filename, stored_pool_data, variable_column_
     df_lingress = clean_column_headers(df_lingress)
     
     # Exclude the first column and get the remaining column names for both DataFrames
-    pool_columns = set(df_pool.columns[1:])
-    lingress_columns = set(df_lingress.columns[1:])
+    pool_columns = list(df_pool.columns[1:])
+    lingress_columns = list(df_lingress.columns[1:])
 
     # Compare the sets of column names
     if pool_columns == lingress_columns:
