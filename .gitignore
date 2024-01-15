@@ -2,3 +2,5 @@
 .venv/
 _Work Data/
 __pycache__
+~$data_w_isotopologues.xlsx
+.DS_Store

@@ -232,7 +232,7 @@ def process_lingress_data(contents, filename, stored_pool_data, variable_column_
 
     # Compare the sets of column names
     if pool_columns == lingress_columns:
-        df_lingress.to_json(date_format='iso', orient='split')
+        return df_lingress.to_json(date_format='iso', orient='split')
         
     else:
         return None

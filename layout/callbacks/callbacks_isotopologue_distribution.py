@@ -11,6 +11,7 @@ from app import app
 from layout.toast import generate_toast
 from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution
 
+
 @app.callback(
     Output('isotopologue-distribution-dropdown', 'options'),
     Input('store-data-iso', 'data'),

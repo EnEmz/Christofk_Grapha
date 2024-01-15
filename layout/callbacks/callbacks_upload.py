@@ -83,7 +83,7 @@ def store_metabolomics_iso_data(contents, stored_pool_data, filename):
 
 
 @app.callback(
-    Output('store-settings-lingress'),
+    Output('store-data-lingress', 'data'),
     [
     Input('upload-data', 'contents'),
     Input('store-data-pool', 'data')
@@ -130,11 +130,12 @@ def store_lingress_data(contents, stored_pool_data, filename):
 ],  
 [
     Input('store-data-pool', 'data'),
-    Input('store-data-iso', 'data')
+    Input('store-data-iso', 'data'),
+    Input('store-data-lingress', 'data'),
 ], 
     State('upload-data', 'filename')
 )
-def update_upload_status(stored_pool_data, stored_iso_data, filename):
+def update_upload_status(stored_pool_data, stored_iso_data, stored_lingress_data, filename):
     '''
     Update and display the upload status and filename of uploaded files.
     This callback function uses the stored pool data, isotopologue data, and the filename of an uploaded file 
@@ -147,6 +148,8 @@ def update_upload_status(stored_pool_data, stored_iso_data, filename):
         JSON-formatted string representing the stored metabolomics pool data.
     stored_iso_data : str
         JSON-formatted string representing the stored isotopologue data.
+    stored_lingress_data : str
+        JSON-formatted string representing the stored linear regression data.
     filename : str
         The name of the most recently uploaded file.
 
@@ -168,8 +171,12 @@ def update_upload_status(stored_pool_data, stored_iso_data, filename):
         # Case: Only pool data is uploaded
         return html.Span('Pool data successfully uploaded', style={'color': 'green'}), filename_display
     elif stored_pool_data is not None and stored_iso_data is not None:
-        # Case: Both pool and isotopic data are uploaded
-        return html.Span('Pool and isotopologue data successfully uploaded', style={'color': 'green'}), filename_display
+        if stored_lingress_data is None:
+            # Case: Both pool and isotopic data are uploaded but no linear regression data
+            return html.Span('Pool and isotopologue data successfully uploaded', style={'color': 'green'}), filename_display
+        else:
+            # Case: Both pool and isotopic data are uploaded with linear regression data
+            return html.Span('Pool, isotopologue and regression data successfully uploaded', style={'color': 'green'}), filename_display
     else:
         # Case: Unexpected error
         print("There was an unexpected error when updating filename status!")
