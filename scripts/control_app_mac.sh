@@ -26,15 +26,21 @@ stop_app() {
 }
 
 update_app() {
+    echo "Backing up the current application..."
+    # Add backup code here if needed
+
     echo "Downloading the latest version of the app..."
     curl -L "${repo_url}/archive/main.zip" -o "$zip_file_name"
 
     echo "Unzipping the repository..."
     unzip -o "$zip_file_name" -d "$project_path"
-    mv -f "$project_path/repo-main/*" "$project_path/"
-    rm -r "$project_path/repo-main"
 
-    echo "Removing the ZIP file..."
+    echo "Replacing old files with new ones..."
+    # This will handle nested directories and files correctly
+    rsync -av --delete "$project_path/repo-main/" "$project_path/"
+
+    echo "Removing temporary files..."
+    rm -r "$project_path/repo-main"
     rm "$zip_file_name"
 
     echo "Updating Python dependencies..."
