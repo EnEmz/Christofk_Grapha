@@ -1,4 +1,5 @@
 #!/bin/bash
+scripts_path="$HOME/Desktop/Christofk_Grapha/scripts"
 project_path="$HOME/Desktop/Christofk_Grapha"
 
 echo "Checking if Python is installed..."

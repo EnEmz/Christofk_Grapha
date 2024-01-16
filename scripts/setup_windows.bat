@@ -1,5 +1,6 @@
 @echo off
 SET project_path=%UserProfile%\Desktop\Christofk_Grapha
+SET scripts_path=%project_path%\scripts
 
 echo Checking if Python is installed...
 where python >nul 2>nul
@@ -13,7 +14,8 @@ cd /d %project_path%
 python -m venv venv
 
 echo Activating the virtual environment...
-call %project_path%\venv\Scripts\activate.bat
+call %
+ %project_path%\venv\Scripts\activate.bat
 
 echo Installing dependencies from requirements.txt...
 pip install -r requirements.txt

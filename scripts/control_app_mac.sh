@@ -1,5 +1,8 @@
 #!/bin/bash
+scripts_path="$HOME/Desktop/Christofk_Grapha/scripts"
 project_path="$HOME/Desktop/Christofk_Grapha"
+repo_url="https://github.com/EnEmz/Christofk_Grapha"
+zip_file_name="repo.zip"
 
 start_app() {
     echo "Activating the virtual environment..."
@@ -22,6 +25,26 @@ stop_app() {
     pkill -f python
 }
 
+update_app() {
+    echo "Downloading the latest version of the app..."
+    curl -L "${repo_url}/archive/main.zip" -o "$zip_file_name"
+
+    echo "Unzipping the repository..."
+    unzip -o "$zip_file_name" -d "$project_path"
+    mv -f "$project_path/repo-main/*" "$project_path/"
+    rm -r "$project_path/repo-main"
+
+    echo "Removing the ZIP file..."
+    rm "$zip_file_name"
+
+    echo "Updating Python dependencies..."
+    source "$project_path/venv/bin/activate"
+    pip install -r "$project_path/requirements.txt"
+    deactivate
+
+    echo "Update complete."
+}
+
 while true; do
     echo "Please type 'start' to run the app or 'stop' to stop it:"
     read action
@@ -33,6 +56,11 @@ while true; do
         stop)
             stop_app
             break
+            ;;
+        update)
+            stop_app
+            update_app
+            start_app
             ;;
         *)
             echo "Invalid input. Please type 'start' or 'stop'."
