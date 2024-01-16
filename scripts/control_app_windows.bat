@@ -46,8 +46,8 @@ curl -L "%repo_url%/archive/main.zip" -o "%zip_file_name%"
 
 echo Unzipping the repository...
 mkdir "%temp_extract_path%"
-tar -xf "%zip_file_name%" -C "%temp_extract_path%"
-xcopy /E /I /Y "%temp_extract_path%\repo-main\*" "%project_path%\"
+powershell -Command "Expand-Archive -LiteralPath '%zip_file_name%' -DestinationPath '%temp_extract_path%' -Force"
+xcopy /E /I /Y "%temp_extract_path%\Christofk_Grapha-main\*" "%project_path%\"
 rd /s /q "%temp_extract_path%"
 
 echo Removing the ZIP file...
@@ -60,6 +60,3 @@ call "%project_path%\venv\Scripts\deactivate.bat"
 
 echo Update complete.
 goto end
-
-:end
-pause
