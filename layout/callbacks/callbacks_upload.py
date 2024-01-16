@@ -168,8 +168,12 @@ def update_upload_status(stored_pool_data, stored_iso_data, stored_lingress_data
     
     # Checking the availability of pool and isotopic data to generate the appropriate status message
     if stored_pool_data is not None and stored_iso_data is None:
+        if stored_lingress_data is None:
         # Case: Only pool data is uploaded
-        return html.Span('Pool data successfully uploaded', style={'color': 'green'}), filename_display
+            return html.Span('Pool data successfully uploaded', style={'color': 'green'}), filename_display
+        else:
+            return html.Span('Pool and regression data successfully uploaded', style={'color': 'green'}), filename_display
+        
     elif stored_pool_data is not None and stored_iso_data is not None:
         if stored_lingress_data is None:
             # Case: Both pool and isotopic data are uploaded but no linear regression data
