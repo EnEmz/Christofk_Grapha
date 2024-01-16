@@ -1722,7 +1722,7 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
             ),
             tickmode='array',
             tickvals=[y_min, y_mid, y_max],
-            ticktext=[f'{y_min:.2f}', f'{y_mid:.2f}', f'{y_max:.2f}']
+            ticktext=[f'{y_min:.1e}', f'{y_mid:.1e}', f'{y_max:.1e}']
         ),
     )
 
