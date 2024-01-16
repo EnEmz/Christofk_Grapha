@@ -1246,7 +1246,21 @@ def get_settings_modal_lingress():
                                 marks={0.1: '0.1', 1: '1'},
                             )
                         ], className="settings-dbc-col"),
-                    ], className="settings-dbc-row")
+                    ], className="settings-dbc-row"),
+                    
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Show Stats in Graph"),
+                            dbc.Checklist(
+                                        options=[
+                                            {"value": 1},
+                                        ],
+                                        value=[1],
+                                        id="lingress-show-stats-in-graph",
+                                        inline=True
+                                    )
+                        ], className="settings-dbc-col"),
+                    ], className="settings-dbc-row"),
             ]),
                     
             dbc.ModalFooter(

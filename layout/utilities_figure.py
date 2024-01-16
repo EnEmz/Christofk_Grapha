@@ -1688,6 +1688,7 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
         ),
         opacity=settings['line_opacity']
     ))
+    
     fig.update_layout(
         xaxis_title=var_name,
         yaxis_title=met_name,
@@ -1725,6 +1726,27 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
             ticktext=[f'{y_min:.1e}', f'{y_mid:.1e}', f'{y_max:.1e}']
         ),
     )
+    
+    # Add annotation for stats if required
+    if settings.get('show_stats', False):
+        stats_text = (
+            f"Slope: {slope:.3f} ± {std_err:.3f}<br>"
+            f"R²: {r_value**2:.3f}<br>"
+            f"P-value: {p_value:.3g}"
+        )
+        fig.add_annotation(
+            x=0.5, y=1.05,  # Position the annotation at the top center
+            xref="paper", yref="paper",
+            text=stats_text,
+            showarrow=False,
+            font=dict(
+                family=settings['font_selector'],
+                size=settings['font_size'],
+                color="black"
+            ),
+            align="center",
+            bgcolor="white"
+        )
 
     # Regression statistics
     stats = {

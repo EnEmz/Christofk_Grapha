@@ -1284,7 +1284,8 @@ def store_settings_isotopologue_distribution(
     State('lingress-datapoint-color', 'value'),
     State('lingress-line-thickness', 'value'),
     State('lingress-line-color', 'value'),
-    State('lingress-line-opacity', 'value')
+    State('lingress-line-opacity', 'value'),
+    State('lingress-show-stats-in-graph', 'value')
 ]
 )
 def store_settings_lingress(
@@ -1298,7 +1299,8 @@ def store_settings_lingress(
                     datapoint_color,
                     line_thickness,
                     line_color,
-                    line_opacity):
+                    line_opacity,
+                    show_stats):
     
     if stored_data_order is not None and (n_clicks is None or n_clicks == 0):
         # Store the initial settings
@@ -1311,7 +1313,8 @@ def store_settings_lingress(
             'datapoint_color': datapoint_color,
             'line_thickness': line_thickness,
             'line_color': line_color,
-            'line_opacity': line_opacity
+            'line_opacity': line_opacity,
+            'show_stats': True if show_stats == [1] else False
         }
         
         return initial_settings
@@ -1328,7 +1331,8 @@ def store_settings_lingress(
             'datapoint_color': datapoint_color,
             'line_thickness': line_thickness,
             'line_color': line_color,
-            'line_opacity': line_opacity
+            'line_opacity': line_opacity,
+            'show_stats': True if show_stats == [1] else False
         }
 
         return new_settings
