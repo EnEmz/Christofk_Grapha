@@ -201,7 +201,6 @@ def display_lingress_plots(n_clicks, var_name, lingress_data, pool_data, met_cla
                     html.P(f"Intercept: {stats['intercept']:.3f}"),
                     html.P(f"R-squared: {stats['r_squared']:.3f}"),
                     html.P(f"P-value: {stats['p_value']:.3g}"),
-                    html.P(f"Standard Error: {stats['std_err']:.3f}")
                 ], className='stats-container')
 
                 # Add to a row with two columns: one for the plot and one for the stats

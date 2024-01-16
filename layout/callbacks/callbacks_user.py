@@ -1228,7 +1228,8 @@ def store_settings_custom_heatmap(n_clicks,
     State('isotopologue-distribution-barwidth', 'value'),
 ]
 )
-def store_settings_isotopologue_distribution(n_clicks, 
+def store_settings_isotopologue_distribution(
+                                n_clicks, 
                                 stored_data_order,
                                 height, 
                                 width, 
@@ -1269,22 +1270,93 @@ def store_settings_isotopologue_distribution(n_clicks,
 
 
 @app.callback(
+    Output('store-settings-lingress', 'data'),
+[
+    Input('update-settings-lingress', 'n_clicks'),
+    Input('store-data-order', 'data')
+],
+[
+    State('lingress-plot-height', 'value'),
+    State('lingress-plot-width', 'value'),
+    State('lingress-font-selector', 'value'),
+    State('lingress-font-size', 'value'),
+    State('lingress-datapoint-size', 'value'),
+    State('lingress-datapoint-color', 'value'),
+    State('lingress-line-thickness', 'value'),
+    State('lingress-line-color', 'value'),
+    State('lingress-line-opacity', 'value')
+]
+)
+def store_settings_lingress(
+                    n_clicks,
+                    stored_data_order,
+                    height,
+                    width,
+                    font_style,
+                    font_size,
+                    datapoint_size,
+                    datapoint_color,
+                    line_thickness,
+                    line_color,
+                    line_opacity):
+    
+    if stored_data_order is not None and (n_clicks is None or n_clicks == 0):
+        # Store the initial settings
+        initial_settings = {
+            'height': height,
+            'width': width,
+            'font_selector': font_style if font_style else 'Arial',
+            'font_size': font_size,
+            'datapoint_size': datapoint_size,
+            'datapoint_color': datapoint_color,
+            'line_thickness': line_thickness,
+            'line_color': line_color,
+            'line_opacity': line_opacity
+        }
+        
+        return initial_settings
+    
+    elif n_clicks > 0:  # Update button has been clicked
+        
+        # Update the settings with the current values
+        new_settings = {
+            'height': height,
+            'width': width,
+            'font_selector': font_style,
+            'font_size': font_size,
+            'datapoint_size': datapoint_size,
+            'datapoint_color': datapoint_color,
+            'line_thickness': line_thickness,
+            'line_color': line_color,
+            'line_opacity': line_opacity
+        }
+
+        return new_settings
+        
+    # If no conditions are met, don’t update the stored data (return None or the current data)
+    return no_update
+
+
+@app.callback(
 [
     Output('normalization-display-container-bulk-heatmap', 'children'),
     Output('normalization-display-container-custom-heatmap', 'children'),
     Output('normalization-display-container-bulk-metabolomics', 'children'),
-    Output('normalization-display-container-volcano', 'children')
+    Output('normalization-display-container-volcano', 'children'),
+    Output('normalization-display-container-lingress', 'children')
+
 ],
 [
     Input('generate-bulk-heatmap-plot', 'n_clicks'),
     Input('generate-custom-heatmap-plot', 'n_clicks'),
     Input('generate-metabolomics', 'n_clicks'),
-    Input('generate-volcano-plot', 'n_clicks')
+    Input('generate-volcano-plot', 'n_clicks'),
+    Input('generate-lingress', 'n_clicks'),
 ],
     State('store-data-normalization', 'data'),
     prevent_initial_call = True
 )
-def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomics, volcano, met_normalization):
+def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomics, volcano, lingress, met_normalization):
     '''
     Display selected normalization variables for various plots in a Dash application.
 
@@ -1301,6 +1373,8 @@ def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomi
         Number of clicks on the 'generate-metabolomics' button.
     volcano : int
         Number of clicks on the 'generate-volcano-plot' button.
+    lingress : int
+        Number of clicks on the 'generate-lingress' button.
     met_normalization : dict
         A dictionary containing the 'selected_values' key with a list of selected normalization methods.
 
@@ -1342,13 +1416,15 @@ def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomi
 
         # Based on which button was clicked, return the message for the corresponding Div
         if button_id == 'generate-bulk-heatmap-plot':
-            return display_message, default_display, default_display, default_display
+            return display_message, default_display, default_display, default_display, default_display
         elif button_id == 'generate-custom-heatmap-plot':
-            return default_display, display_message, default_display, default_display
+            return default_display, display_message, default_display, default_display, default_display
         elif button_id == 'generate-metabolomics':
-            return default_display, default_display, display_message, default_display
+            return default_display, default_display, display_message, default_display, default_display
         elif button_id == 'generate-volcano-plot':
-            return default_display, default_display, default_display, display_message
+            return default_display, default_display, default_display, display_message, default_display
+        elif button_id == 'generate-lingress':
+            return default_display, default_display, default_display, default_display, display_message
         else:
             # If for some reason, the button_id doesn't match, raise PreventUpdate to avoid updating
             raise PreventUpdate

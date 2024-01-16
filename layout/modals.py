@@ -1018,7 +1018,7 @@ def get_settings_modal_volcano():
             backdrop="static"
         )
     
-    
+      
 def get_pvalue_modal_bulk_metabolomics():
     return dbc.Modal(
                 [
@@ -1127,8 +1127,128 @@ def get_pvalue_modal_isotopologue_distribution():
 def get_settings_modal_lingress():
     return dbc.Modal(
         [
-            dbc.ModalHeader("Something to work on."),
+            dbc.ModalHeader('Configure settings for the linear regression to metabolomics plots.'),
             
+            dbc.ModalBody([
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Height"),
+                            # Slider for height of the volcano plot.
+                            dcc.Slider(
+                                id="lingress-plot-height",
+                                min=100,
+                                max=2000,
+                                step=50,
+                                value=500,
+                                marks={100: '100', 500: '500', 1000: '1000', 1500: '1500', 2000: '2000'},
+                            )
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Width"),
+                            # Slider for the width of the volcano plot.
+                            dcc.Slider(
+                                id="lingress-plot-width",
+                                min=100,
+                                max=2000,
+                                step=50,
+                                value=800,
+                                marks={100: '100', 500: '500', 1000: '1000', 1500: '1500', 2000: '2000'},
+                            )
+                        ], className="settings-dbc-col"),
+                    ], className="settings-dbc-row"),
+                    
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Plot Font Style"),
+                            # Selection of the font for all text components in the plots.
+                            dbc.Select(
+                                id='lingress-font-selector',
+                                options=[
+                                    {"label": "Arial", "value": "Arial"},
+                                    {"label": "Helvetica", "value": "Helvetica"},
+                                    {"label": "Times New Roman", "value": "Times New Roman"},
+                                    {"label": "Courier New", "value": "Courier New"},
+                                    {"label": "Comic Sans MS", "value": "Comic Sans MS"},
+                                    {"label": "Impact", "value": "Impact"},
+                                    {"label": "Verdana", "value": "Verdana"},
+                                    {"label": "Georgia", "value": "Georgia"},
+                                    {"label": "Lucida Sans Unicode", "value": "Lucida Sans Unicode"},
+                                    {"label": "Tahoma", "value": "Tahoma"},
+                                    {"label": "Trebuchet MS", "value": "Trebuchet MS"},
+                                    {"label": "Palatino Linotype", "value": "Palatino Linotype"},
+                                    {"label": "Garamond", "value": "Garamond"},
+                                    {"label": "Bookman", "value": "Bookman"},
+                                    {"label": "Avant Garde", "value": "Avant Garde"},
+                                    # Add more fonts or edit if needed.
+                                ],
+                                value="Arial",  # Default value for fonts
+                                style={'marginTop': '10px'}
+                            )
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Plot Font Size"),
+                            # Slider for changing the font size for all text elements in the plots.
+                            dcc.Slider(
+                                id="lingress-font-size",
+                                min=5,
+                                max=20,
+                                step=1,
+                                value=14,
+                                marks={5: '5', 20: '20'},
+                            )
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Datapoint Size"),
+                            # Slider for changing size of datapoints if visible.
+                            dcc.Slider(
+                                id="lingress-datapoint-size",
+                                min=1,
+                                max=20,
+                                step=1,
+                                value=7,
+                                marks={1: '1', 10: '10', 20: '20'},
+                            )
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Datapoint Color"),
+                            # Color selection for the datapoint display color
+                            # Default is black
+                            dbc.Input(id="lingress-datapoint-color", type="color", value="#000000")
+                        ], className="settings-dbc-col"),
+                    ], className="settings-dbc-row"),
+                    
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Line Thickness"),
+                            # Slider for changing the font size for all text elements in the plots.
+                            dcc.Slider(
+                                id="lingress-line-thickness",
+                                min=1,
+                                max=10,
+                                step=1,
+                                value=5,
+                                marks={1: '1', 5: '5', 10: '10'},
+                            )
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Line Color"),
+                            dbc.Input(id="lingress-line-color", type="color", value="#FF0000")
+                        ], className="settings-dbc-col"),
+                        dbc.Col([
+                            html.Label("Line Opacity"),
+                            # Slider for changing the font size for all text elements in the plots.
+                            dcc.Slider(
+                                id="lingress-line-opacity",
+                                min=0.1,
+                                max=1,
+                                step=0.1,
+                                value=1,
+                                marks={0.1: '0.1', 1: '1'},
+                            )
+                        ], className="settings-dbc-col"),
+                    ], className="settings-dbc-row")
+            ]),
+                    
             dbc.ModalFooter(
                 dbc.Button("Update", id="update-settings-lingress", n_clicks=0, color="success")
             )

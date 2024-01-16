@@ -1634,6 +1634,9 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
         Dictionary containing regression statistics (slope, intercept, r_value, p_value, std_err).
     """
     
+    # Extract column names for hover text
+    sample_names = df_var_data.columns[1:]
+    
     # Extract the metabolite and variable names
     met_name = df_met_data['Compound'].iloc[0]
     var_name = df_var_data['Variable'].iloc[0]
@@ -1646,21 +1649,81 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
     valid_indices = (~var_values.isna()) & (~met_values.isna())
     var_values_filtered = var_values[valid_indices]
     met_values_filtered = met_values[valid_indices]
+
+    # Adjusting the sample_names to match the filtered data
+    sample_names_filtered = sample_names[valid_indices]
+
+    # Determine hover text for each data point
+    hover_texts = [sample_name for sample_name in sample_names_filtered]
     
     # Perform linear regression
     slope, intercept, r_value, p_value, std_err = linregress(var_values_filtered, met_values_filtered)
+    
+    # Determine min and max values for x and y axes
+    y_min, y_max = met_values_filtered.min(), met_values_filtered.max()
+    y_mid = (y_min + y_max) / 2
 
     # Create a scatter plot with a regression line
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=var_values_filtered, y=met_values_filtered, mode='markers', name='Data'))
-    fig.add_trace(go.Scatter(x=var_values_filtered, y=intercept + slope * var_values_filtered, mode='lines', name='Fit'))
-
+    fig.add_trace(go.Scatter(
+        x=var_values_filtered, 
+        y=met_values_filtered, 
+        mode='markers', 
+        name='Data',
+        marker=dict(
+            size=settings['datapoint_size'],
+            color=settings['datapoint_color']
+        ),
+        text=hover_texts,
+        hoverinfo='text'
+    ))
+    fig.add_trace(go.Scatter(
+        x=var_values_filtered, 
+        y=intercept + slope * var_values_filtered, 
+        mode='lines', 
+        name='Fit',
+        line=dict(
+            width=settings['line_thickness'],
+            color=settings['line_color']
+        ),
+        opacity=settings['line_opacity']
+    ))
     fig.update_layout(
         xaxis_title=var_name,
         yaxis_title=met_name,
         autosize=False,
-        width=600,
-        height=400
+        showlegend=False,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        width=settings['width'],
+        height=settings['height'],
+        xaxis=dict(
+            title_font=dict(  # Sets the font for the x-axis title
+                family=settings['font_selector'],
+                size=settings['font_size'],
+                color='black'
+            ),
+            tickfont=dict(  # Sets the font for the x-axis ticks
+                family=settings['font_selector'],
+                size=settings['font_size'],
+                color='black'
+            )
+        ),
+        yaxis=dict(
+            title_font=dict(  # Sets the font for the y-axis title
+                family=settings['font_selector'],
+                size=settings['font_size'],
+                color='black'
+            ),
+            tickfont=dict(  # Sets the font for the y-axis ticks
+                family=settings['font_selector'],
+                size=settings['font_size'],
+                color='black'
+            ),
+            tickmode='array',
+            tickvals=[y_min, y_mid, y_max],
+            ticktext=[f'{y_min:.2f}', f'{y_mid:.2f}', f'{y_max:.2f}']
+        ),
     )
 
     # Regression statistics
