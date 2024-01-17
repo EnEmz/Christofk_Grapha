@@ -47,7 +47,7 @@ curl -L "%repo_url%/archive/main.zip" -o "%zip_file_name%"
 echo Unzipping the repository...
 mkdir "%temp_extract_path%"
 powershell -Command "Expand-Archive -LiteralPath '%zip_file_name%' -DestinationPath '%temp_extract_path%' -Force"
-xcopy /E /I /Y "%temp_extract_path%\Christofk_Grapha-main\*" "%project_path%\"
+xcopy /E /I /Y /EXCLUDE:%project_path%\exclude.txt "%temp_extract_path%\Christofk_Grapha-main\*" "%project_path%\"
 rd /s /q "%temp_extract_path%"
 
 echo Removing the ZIP file...
@@ -55,8 +55,11 @@ del "%zip_file_name%"
 
 echo Updating Python dependencies...
 call "%project_path%\venv\Scripts\activate.bat"
+pip install --upgrade pip
 pip install -r "%project_path%\requirements.txt"
 call "%project_path%\venv\Scripts\deactivate.bat"
 
 echo Update complete.
 goto end
+
+:end
