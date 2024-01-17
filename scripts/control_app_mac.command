@@ -57,7 +57,12 @@ update_app() {
 }
 
 while true; do
-    echo "Please type 'start' to run the app or 'stop' to stop it:"
+    echo "-------------------------------------"
+    echo "Please type 'start' to run the app."
+    echo "Please type 'stop' to stop the app."
+    echo "Please type 'update' to update the app."
+    echo "-------------------------------------"
+
     read action
 
     case "$action" in 
