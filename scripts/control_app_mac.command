@@ -33,19 +33,15 @@ update_app() {
     curl -L "${repo_url}/archive/main.zip" -o "$zip_file_name"
 
     echo "Unzipping the repository..."
-    # Unzip directly to a temporary directory
     temp_dir="$project_path/temp_repo"
     mkdir -p "$temp_dir"
     unzip -o "$zip_file_name" -d "$temp_dir"
 
-    # The name of the extracted folder might be different, adjust accordingly
     extracted_dir=$(ls "$temp_dir" | head -1)
     full_extracted_path="$temp_dir/$extracted_dir"
 
     echo "Replacing old files with new ones from the repository..."
-    # This will update existing files and add new ones from the repo,
-    # but won't delete any user-added files in the project directory
-    rsync -av --exclude='.git' --exclude='venv' "$full_extracted_path/" "$project_path/"
+    rsync -av --exclude='.git' --exclude='venv' --exclude='scripts' "$full_extracted_path/" "$project_path/"
 
     echo "Removing temporary files..."
     rm -rf "$temp_dir"
