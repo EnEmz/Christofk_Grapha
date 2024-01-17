@@ -66,7 +66,6 @@ while true; do
         update)
             stop_app
             update_app
-            start_app
             ;;
         *)
             echo "Invalid input. Please type 'start' or 'stop'."
