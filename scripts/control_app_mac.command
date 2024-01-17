@@ -33,18 +33,27 @@ update_app() {
     curl -L "${repo_url}/archive/main.zip" -o "$zip_file_name"
 
     echo "Unzipping the repository..."
-    unzip -o "$zip_file_name" -d "$project_path"
+    # Unzip directly to a temporary directory
+    temp_dir="$project_path/temp_repo"
+    mkdir -p "$temp_dir"
+    unzip -o "$zip_file_name" -d "$temp_dir"
 
-    echo "Replacing old files with new ones..."
-    # This will handle nested directories and files correctly
-    rsync -av --delete "$project_path/repo-main/" "$project_path/"
+    # The name of the extracted folder might be different, adjust accordingly
+    extracted_dir=$(ls "$temp_dir" | head -1)
+    full_extracted_path="$temp_dir/$extracted_dir"
+
+    echo "Replacing old files with new ones from the repository..."
+    # This will update existing files and add new ones from the repo,
+    # but won't delete any user-added files in the project directory
+    rsync -av --exclude='.git' --exclude='venv' "$full_extracted_path/" "$project_path/"
 
     echo "Removing temporary files..."
-    rm -r "$project_path/repo-main"
+    rm -rf "$temp_dir"
     rm "$zip_file_name"
 
     echo "Updating Python dependencies..."
     source "$project_path/venv/bin/activate"
+    pip install --upgrade pip  # Upgrading pip to the latest version
     pip install -r "$project_path/requirements.txt"
     deactivate
 

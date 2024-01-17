@@ -18,9 +18,7 @@ source "$project_path/venv/bin/activate"
 
 echo "Installing dependencies from requirements.txt..."
 pip install -r requirements.txt
+pip install --upgrade pip  # Upgrading pip to the latest version
 
 echo "Deativating the virtual environment..."
 source "$project_path/venv/bin/deactivate"
-
-echo "Setup is complete!"
-read -p "Press any key to continue..."
