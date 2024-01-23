@@ -271,7 +271,6 @@ def display_volcano_plot(n_clicks, search_value, pool_data, met_classes, met_nor
                         }
                     }
                 )], fig_json, no_update
-    
     else:
         return no_update, no_update, no_update
     
