@@ -140,7 +140,6 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
             pvalue_comparisons = pvalue_info['combinations']
             pvalue_numerical = pvalue_info['numerical_bool']
             fig = add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, pvalue_comparisons, pvalue_numerical, settings)
-            
 
         filename = 'iso_distribution_' + str(met_name)
         

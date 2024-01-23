@@ -148,6 +148,7 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
                     df_met_iso = df_iso[df_iso['Compound'] == met_name]
                     
                     figure_met_iso = generate_single_met_iso_figure(df_met_iso, grouped_samples, settings)
+                    iso_filename = 'iso_' + str(met_name)
                     
                     # Add p-value components to the graph if the user stored comparison
                     if pvalue_info is not None:
@@ -155,9 +156,7 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
                         pvalue_comparisons = pvalue_info['combinations']
                         pvalue_numerical = pvalue_info['numerical_bool']
                         figure_met_iso = add_p_value_annotations_iso(figure_met_iso, df_met_iso, grouped_samples, pvalue_comparisons, pvalue_numerical, settings)
-                    
-                    iso_filename = 'iso_' + str(met_name)
-                    
+                        
                     dbc_row.children.append(dbc.Col(
                                                 dcc.Graph(
                                                     figure=figure_met_iso,
@@ -171,9 +170,9 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
                                                 }), 
                                                 className='bulk-met-graph-col'))
                 
-                
                 df_met_pool = pd.DataFrame([row])
                 figure_met_pool = generate_single_met_pool_figure(df_met_pool, grouped_samples, settings)
+                pool_filename = 'pool_' + str(met_name)
                 
                 # Add p-value components to the graph if the user stored comparison
                 if pvalue_info is not None:
@@ -181,9 +180,7 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
                     pvalue_comparisons = pvalue_info['combinations']
                     pvalue_numerical = pvalue_info['numerical_bool']
                     figure_met_pool = add_p_value_annotations_pool(figure_met_pool, pvalue_comparisons, pvalue_numerical, settings)
-
-                pool_filename = 'pool_' + str(met_name)
-                
+                    
                 # Add the pool data graph as a dbc Col to the dbc Row
                 dbc_row.children.append(dbc.Col(
                                             dcc.Graph(

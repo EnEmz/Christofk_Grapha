@@ -194,6 +194,7 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
                         }
                     }
                 ))
+                
             else:
                 print(f"An issue occurred while generating the heatmap for pathway: {pathway_name}")
             
@@ -339,6 +340,7 @@ def display_bulk_isotopologue_heatmap_plot(n_clicks, iso_data, met_classes, met_
                             }
                         }
                     ))
+                    
                 else:
                     print(f"An issue occurred while generating the heatmap for pathway: {pathway_name}")
         
