@@ -732,8 +732,15 @@ def get_settings_modal_metabolomics():
 def get_settings_modal_iso_distribution():
     return dbc.Modal(
                 [
-                    dbc.ModalHeader("Coming soon, now does not do anything."),
+                    dbc.ModalHeader("Change the settings for the isotopologue distribution plot."),
                     dbc.ModalBody([
+                        html.Label("Select specific isotopologues for the selected metabolite to be displayed in the isotpologue distribution plot."),
+                        dbc.Row([
+                            dbc.Col(html.Div(id='isotopologue-distribution-selection-checkboxes', children=[])),
+                        ],
+                        justify='center',
+                        align='center'),
+                        
                         dbc.Row([
                             dbc.Col([
                                 html.Label("Height"),
@@ -760,6 +767,7 @@ def get_settings_modal_iso_distribution():
                                 )
                             ], className="settings-dbc-col"),
                         ], className="settings-dbc-row"),
+                        
                         dbc.Row([
                             dbc.Col([
                                 html.Label("Plot Font Style"),

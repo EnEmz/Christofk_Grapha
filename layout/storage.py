@@ -43,6 +43,7 @@ def build_storage_components():
     
     # For plot manipulation
     storage_components.append(get_storage('store-volcano-clicked-datapoints'))
+    storage_components.append(get_storage('store-isotopologue-distribution-selection'))
     
     
     

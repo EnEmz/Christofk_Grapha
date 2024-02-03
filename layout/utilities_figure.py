@@ -1460,7 +1460,7 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
         # Proceed to plotting if not all values are zero
         for sample_group_index, (sample_group, cols_in_group) in enumerate(grouped_samples.items()):
             color = iso_color_palette[sample_group_index % len(iso_color_palette)]
-            
+             
             data_for_label = df_iso_met[df_iso_met['C_Label'] == label][cols_in_group]
             
             # Calculate mean and std deviation across the group columns

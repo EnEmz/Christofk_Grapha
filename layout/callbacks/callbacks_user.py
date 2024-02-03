@@ -1432,3 +1432,114 @@ def display_selected_normalization(bulk_heatmap, custom_heatmap, bulk_metabolomi
         else:
             # If for some reason, the button_id doesn't match, raise PreventUpdate to avoid updating
             raise PreventUpdate
+        
+        
+@app.callback(
+    Output('isotopologue-distribution-selection-checkboxes', 'children'),
+    Input('generate-isotopologue-distribution', 'n_clicks'),
+[
+    State('store-data-iso', 'data'),
+    State('isotopologue-distribution-dropdown', 'value'),
+    State('store-data-order', 'data')
+],
+    prevent_initial_call = True
+)
+def display_iso_distribution_selection(n_clicks, iso_data, met_name, met_groups):
+    '''
+    
+    '''
+        
+    ctx = callback_context  # Get callback context to identify which input has triggered the callback
+    
+    if not ctx.triggered:
+        triggered_id = 'No clicks yet'
+    else:
+        triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if triggered_id == 'generate-isotopologue-distribution' and n_clicks > 0:
+    
+        if iso_data is None or met_groups is None:
+            return no_update
+        
+        if not met_name:
+            return no_update
+        
+       # Read the isotopologue data from the JSON string
+        iso_json_file = io.StringIO(iso_data)
+        df_iso = pd.read_json(iso_json_file, orient='split') 
+        
+        # Filter the data for the selected metabolite
+        df_iso_met = df_iso[df_iso['Compound'] == met_name].fillna(0).reset_index(drop=True)
+        
+        # Process and group the sample data based on the input groups
+        grouped_samples = {group: samples for group, samples in met_groups.items() if group and samples}
+        
+        valid_isotopologues = []
+
+        # Iterate through every isotopologue for the metabolite data
+        for label in df_iso_met['C_Label'].unique():
+            all_zero = True
+            for sample_group, cols_in_group in grouped_samples.items():
+                data_for_label = df_iso_met[df_iso_met['C_Label'] == label][cols_in_group]
+                mean_for_label = data_for_label.mean(axis=1).mean()
+                
+                if mean_for_label != 0:  # If any mean is non-zero, set all_zero to False and exit loop
+                    all_zero = False
+                    break
+
+            if not all_zero:
+                valid_isotopologues.append(label)
+        
+        # Generate labels and checkboxes for valid isotopologues
+        checkbox_components = []
+        for iso in valid_isotopologues:
+            checkbox_id = {'type': 'isotopologue-selection-checkbox', 'index': f"{iso}"}
+            checkbox_components.append(
+                dbc.Col([
+                    html.Div([
+                        html.Label(f'M{iso}', htmlFor=json.dumps(checkbox_id), className="form-check-label"),
+                        dbc.Checkbox(id=checkbox_id,
+                                     value=True),
+                    ])
+                ], className="settings-dbc-col", width="auto")
+            )
+            
+        # Combine the labels and checkboxes into a single row
+        checkboxes_row = dbc.Row(checkbox_components, className="settings-dbc-row")
+        
+        return checkboxes_row
+    
+    else:
+        return no_update
+    
+@app.callback(
+    Output('store-isotopologue-distribution-selection', 'data'),
+    Input('update-settings-isotopologue-distribution', 'n_clicks'),
+[
+    State({'type': 'isotopologue-selection-checkbox', 'index': ALL}, 'value'),
+    State({'type': 'isotopologue-selection-checkbox', 'index': ALL}, 'id'),
+    State('isotopologue-distribution-dropdown', 'value')
+]
+)
+def store_iso_distribution_selection(n_clicks, checked_values, ids, met_name):
+    '''
+    
+    '''
+    
+    ctx = callback_context  # Get callback context to identify which input has triggered the callback
+    
+    if not ctx.triggered:
+        triggered_id = 'No clicks yet'
+    else:
+        triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if triggered_id == 'update-settings-isotopologue-distribution' and n_clicks > 0:
+    
+        # Create a list of isotopologue indexes as strings that are currently checked
+        checked_isotopologues = [id['index'] for checked, id in zip(checked_values, ids) if checked]
+        
+        # Store the list of checked isotopologues
+        return checked_isotopologues
+    
+    else:
+        return None

@@ -65,11 +65,12 @@ def update_iso_distribution_dropdown_options(iso_data):
 [
     State('store-data-order', 'data'),
     State('store-p-value-isotopologue-distribution', 'data'),
-    State('store-settings-isotopologue-distribution', 'data')
+    State('store-settings-isotopologue-distribution', 'data'),
+    State('store-isotopologue-distribution-selection', 'data')
 ],
     prevent_initial_call = True
 )
-def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_groups, pvalue_info, settings):
+def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_groups, pvalue_info, settings, selected_isos):
     '''
     Display an isotopologue distribution plot based on user-selected parameters and provided data.
     This function is triggered by the 'generate-isotopologue-distribution' button and creates a bar chart 
@@ -90,6 +91,8 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
         Information about p-values for statistical significance.
     settings : dict
         Selected or placeholder settings for the isotopologue distribution plot.
+    selected_isos: list
+        Select isotopologues to be displayed in the isotopologue distribution plot.
 
     Returns:
     -------
@@ -130,6 +133,16 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
         
         # Filter the data for the selected metabolite
         df_iso_met = df_iso[df_iso['Compound'] == met_name].fillna(0).reset_index(drop=True)
+        
+        # Convert the selected isotopologue numbers back into integers
+        if selected_isos:
+            selected_isos = [int(iso) for iso in selected_isos]
+        else:
+            # If no isotopologues are selected (e.g., on first run), select all available
+            selected_isos = df_iso_met['C_Label'].dropna().unique().tolist()
+        
+        # Filter the DataFrame for only the selected isotopologues
+        df_iso_met = df_iso_met[df_iso_met['C_Label'].isin(selected_isos)]
         
         # Process and group the sample data based on the input groups
         grouped_samples = {group: samples for group, samples in met_groups.items() if group and samples}
