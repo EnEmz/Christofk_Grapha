@@ -237,7 +237,7 @@ def get_tab_isotopologue_distribution():
                     className='just-a-button'
                 ),
                 dbc.Col(
-                    create_button("Change Metabolomics Plot Settings",
+                    create_button("Change Isotopologue Distribution Plot Settings",
                                             "change-settings-isotopologue-distribution",
                                             color="secondary"),
                     className='just-a-button'
@@ -349,7 +349,7 @@ def get_tab_lingress():
                 dbc.Col(
                     create_button("Change Linear Regression Plot Settings",
                                   "change-settings-lingress",
-                                  color="info"),
+                                  color="secondary"),
                     className='just-a-button'
                 ),
             ]),
