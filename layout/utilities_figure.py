@@ -102,7 +102,8 @@ def generate_single_met_pool_figure(df_metabolite, grouped_samples, settings):
         tickfont=dict(
             family=settings['font_selector'],
             size=settings['font_size']
-        )
+        ),
+        range=[-0.5, len(grouped_samples) - 0.5]
     )
     
     return fig
@@ -1506,7 +1507,6 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
     )
     
     fig.update_yaxes(range=[0,1])
-    fig.update_xaxes(range=[-0.5, len(grouped_samples) - 0.5])
     
     return fig
 
