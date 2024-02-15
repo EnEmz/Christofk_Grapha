@@ -1505,7 +1505,7 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
         paper_bgcolor='white'
     )
     
-    fig.update_yaxes(range=[0,1])
+    fig.update_yaxes(range=[-0.5, len(grouped_samples) - 0.5])
     
     return fig
 
