@@ -121,8 +121,6 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         normalization_list = met_normalization['selected_values']
         selected_met_classes = met_classes['selected_values']
         
-        print(selected_met_classes)
-        
         # Normalize the data based on the selected normalization variables
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
         
