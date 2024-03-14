@@ -1573,6 +1573,30 @@ def store_iso_distribution_selection(n_clicks, checked_values, ids, met_name):
 ]
 )
 def manage_metabolite_ratios_dropdown(add_clicks, clear_clicks, restore_clicks, delete_clicks_list, pool_data, children, user_action):
+    """
+    Manages the addition, deletion, and restoration of metabolite ratio dropdowns based on user interactions.
+
+    Parameters:
+    add_clicks : int
+        Number of times the add metabolite ratio button has been clicked.
+    clear_clicks : int
+        Number of times the clear metabolite ratios button has been clicked.
+    restore_clicks : int
+        Number of times the restore metabolite ratios button has been clicked.
+    delete_clicks_list : list
+        List containing the number of clicks for each delete button, correlated by index.
+    pool_data : json
+        JSON formatted string containing data from the user's uploaded file.
+    children : list
+        Current list of children elements (metabolite ratio dropdowns) in the metabolite ratios container.
+    user_action : dict
+        Stores data about whether the metabolite ratios have been cleared by the user.
+
+    Returns:
+    tuple
+        A tuple containing the updated children list and a dictionary to update the 'store-user-metabolite-ratio-cleared' data store.
+    """
+    
     ctx = callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
@@ -1622,6 +1646,21 @@ def manage_metabolite_ratios_dropdown(add_clicks, clear_clicks, restore_clicks, 
 
 
 def create_metabolite_ratio_dropdown(index, met_list, default_ratio=None):
+    """
+    Creates a new metabolite ratio dropdown row with numerator and denominator selections.
+
+    Parameters:
+    index : int
+        Index of the new dropdown row, used for unique identification within dynamic elements.
+    met_list : list
+        List of available metabolites that can be selected for the numerator and denominator.
+    default_ratio : dict, optional
+        Default ratio settings with 'numerator' and 'denominator' keys, used for restoring state.
+
+    Returns:
+    html.Div
+        A Div containing the newly created metabolite ratio dropdown row, including the numerator and denominator dropdowns, and a delete button.
+    """
     
     # Generate options based on met_list while excluding unwanted metabolites
     options = [{'label': met, 'value': met} for met in met_list if not any(met.startswith(exclude) for exclude in normalization_preselected)]
@@ -1664,6 +1703,22 @@ def create_metabolite_ratio_dropdown(index, met_list, default_ratio=None):
 ]
 )
 def store_metabolite_ratios_selection(n_clicks, numerators, denominators):
+    """
+    Stores the user-selected metabolite ratios after the update button is clicked.
+
+    Parameters:
+    n_clicks : int
+        Number of times the update metabolite ratios button has been clicked.
+    numerators : list
+        List of selected values for the numerator part of each metabolite ratio.
+    denominators : list
+        List of selected values for the denominator part of each metabolite ratio.
+
+    Returns:
+    list
+        A list of dictionaries representing the stored metabolite ratios where each dictionary contains a 'numerator' and a 'denominator'.
+    """
+    
     if n_clicks is None or n_clicks < 1:
         return no_update
 
