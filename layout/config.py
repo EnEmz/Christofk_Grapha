@@ -38,13 +38,11 @@ met_class_list_preselected = [
                             "SCFAs",
                             "bile acid",
                             "small-molecule",
-                            "succinilation",
-                            "purine intermediate",
                             "tryptophan metabolism",
-                            "histidine metabolism"
+                            "metabolite ratios"
                             ]
 
-# Color palette for isotopologue bar pltos and iso distribution plot
+# Color palette for isotopologue bar plots and iso distribution plot
 iso_color_palette = [
     "#C4C3C3",  # Light Gray
     "#FA8072",  # Salmon
@@ -86,4 +84,21 @@ iso_color_palette = [
     "#FF69B4",  # Hot Pink
     "#3CB371",  # Medium Sea Green
     "#B22222",  # Firebrick
+]
+
+p_value_correction_options = [
+        'None',
+        'Benjamini-Hochberg',
+        'Bonferroni'  
+]
+
+
+# Placeholder metabolite ratios list
+metabolite_ratios_default = [
+    {'numerator': 'alpha-ketoglutarate', 'denominator': 'succinate'},
+    {'numerator': 'fumarate', 'denominator': 'malate'},
+    {'numerator': 'AMP', 'denominator': 'ADP'},
+    {'numerator': 'NAD+', 'denominator': 'NADH'},
+    {'numerator': 'NADP+', 'denominator': 'NADPH'},
+    {'numerator': 'GSH', 'denominator': 'GSSG'},
 ]

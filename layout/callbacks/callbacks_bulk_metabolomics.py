@@ -9,7 +9,7 @@ from dash import html, dcc, no_update, callback_context
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_met_iso_figure, add_p_value_annotations_iso, generate_single_met_pool_figure, add_p_value_annotations_pool
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_met_iso_figure, add_p_value_annotations_iso, generate_single_met_pool_figure, add_p_value_annotations_pool, compile_met_pool_ratio_data
 
 
 @app.callback(
@@ -25,11 +25,12 @@ from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data
     State('store-data-normalization', 'data'),
     State('store-data-order', 'data'),
     State('store-p-value-metabolomics', 'data'),
-    State('store-settings-metabolomics', 'data')
+    State('store-settings-metabolomics', 'data'),
+    State('store-metabolite-ratios', 'data')
 ],
     prevent_initial_call=True
 )
-def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalization, met_groups, pvalue_info, settings):
+def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalization, met_groups, pvalue_info, settings, met_ratio_selection):
     """
     Generates and displays metabolomics data visualizations based on various user inputs and selections.
     
@@ -42,7 +43,8 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         JSON data from the isotopologue data.
     met_classes : dict
         User-selected metabolite classes.
-    met_normalization (dict): User-selected normalization variables.
+    met_normalization : dict
+        User-selected normalization variables.
     met_groups : dict
         User-defined sample groups.
     pvalue_info : dict
@@ -119,14 +121,31 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         normalization_list = met_normalization['selected_values']
         selected_met_classes = met_classes['selected_values']
         
+        print(selected_met_classes)
+        
+        # Normalize the data based on the selected normalization variables
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
+        
+        
+        
+        # Filter pool data based on selected metabolite classes
         df_pool_normalized_grouped = group_met_pool_data(df_pool_normalized, selected_met_classes)
+        
+        # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
+        # compiled and added to the end of the pool data dataframe
+        if 'metabolite ratios' in selected_met_classes:
+            df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
+            df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         
         df_pool_normalized_groupby = df_pool_normalized_grouped.groupby('pathway_class', sort=False)
                
         figures_mets = []
         # Iterate over each group of pathway_class
         for pathway, group_df in df_pool_normalized_groupby:
+            
+            # Make sure isotopologue data is not plotted when displaying metabolite ratio data
+            if pathway == 'metabolite ratios':
+                iso_present = False
             
             # Append button and an empty container for graphs
             figures_mets.append(html.Div([

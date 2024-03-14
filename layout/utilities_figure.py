@@ -544,7 +544,7 @@ def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
     df_pool_normalized = df_pool_normalized[~df_pool_normalized['Compound'].isin(normalization_list)]
     df_pool_normalized = df_pool_normalized.reset_index(drop=True)
     
-    return df_pool_normalized
+    return df_pool_normalized 
 
 
 def group_met_pool_data(df, selected_met_classes):
@@ -565,9 +565,6 @@ def group_met_pool_data(df, selected_met_classes):
         A DataFrame containing the filtered and grouped normalized metabolite pool data.
     '''
     
-    # Ensure that 'df_met_group_list' is a glocal pandas dataframe where molecules are organized in classes
-    # and 'pathway_class' is the column name where the list of metabolite classes is available
-    
     # Filter the metabolite groups based on the selected metabolite classes
     df_met_group_select = df_met_group_list[df_met_group_list['pathway_class'].isin(selected_met_classes)]
     
@@ -579,6 +576,63 @@ def group_met_pool_data(df, selected_met_classes):
     
     return df_filtered
 
+
+def compile_met_pool_ratio_data(df_pool_normalized_grouped, ratio_list):
+    '''
+    Compiles a metabolite pool ratio dataframe from selected metabolite ratio list by the user.
+    Should be used with a df that comes after using group_met_pool_data() function.
+    
+    
+    Paramaters:
+    ----------
+    df_pool_normalized_grouped : pandas.DataFrame
+        A DataFrame containing normalized and grouped metabolomics pool data.
+        
+        ratio_list : list
+            A list of dictionaries for selecting numerators and denominators for metabolite ratios
+            based on the user selection.
+    
+    Returns:
+    -------
+    pandas.Dataframe
+        A DataFrame containing metabolite ratio data for all sample replicates for the metabolite 
+        ratios that the user has selected. Has included 'pathway_class' column and this df can be 
+        concatenated with the df that comes after group_met_pool_data.
+    '''
+
+    df_ratios = pd.DataFrame()
+    
+    for ratio in ratio_list:
+        numerator = ratio['numerator']
+        denominator = ratio['denominator']
+        
+        # Check presence
+        if numerator in df_pool_normalized_grouped['Compound'].values and denominator in df_pool_normalized_grouped['Compound'].values:
+            
+            # Extract values
+            num_values = df_pool_normalized_grouped.loc[df_pool_normalized_grouped['Compound'] == numerator, df_pool_normalized_grouped.columns[1:]].values
+            denom_values = df_pool_normalized_grouped.loc[df_pool_normalized_grouped['Compound'] == denominator, df_pool_normalized_grouped.columns[1:]].values
+            
+            # Ensure single row extraction
+            if num_values.shape[0] == 1 and denom_values.shape[0] == 1:
+
+                 # Avoid division by zero by setting ratios to 0 where denominator is 0
+                ratio_values = np.where(denom_values != 0, num_values / denom_values, 0)
+                
+                # Create temp DataFrame
+                temp_df = pd.DataFrame(ratio_values, columns=df_pool_normalized_grouped.columns[1:])
+                temp_df['Compound'] = f"{numerator} / {denominator}"
+                temp_df['pathway_class'] = 'metabolite ratios'
+                temp_df = temp_df[['pathway_class', 'Compound'] + list(df_pool_normalized_grouped.columns[1:])]
+                
+                # Append to main DataFrame
+                df_ratios = pd.concat([df_ratios, temp_df])
+    
+    df_ratios = df_ratios.reset_index(drop=True)
+    
+    return df_ratios
+    
+    
 
 def generate_volcano_plot(df_volcano, FC_cutoff, third_pvalue_cutoff, second_pvalue_cutoff, first_pvalue_cutoff, settings, search_value=None):
     """

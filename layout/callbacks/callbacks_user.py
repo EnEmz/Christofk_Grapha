@@ -9,7 +9,7 @@ from dash import html, dcc, no_update, callback_context
 import json
 
 from app import app
-from layout.config import normalization_preselected
+from layout.config import normalization_preselected, metabolite_ratios_default
 
 
 # Met classes callback functions
@@ -1543,3 +1543,135 @@ def store_iso_distribution_selection(n_clicks, checked_values, ids, met_name):
     
     else:
         return None
+    
+    
+# @app.callback(
+# [
+#     Output('p-value-metabolomics-correction-dropdown', 'children')
+# ],
+
+# )
+# def create_pvalue_correction_dropdowns():
+#     pass
+
+
+@app.callback(
+[
+    Output('metabolite-ratios-container', 'children'),
+    Output('store-user-metabolite-ratio-cleared', 'data')
+],
+[
+    Input('add-metabolite-ratio', 'n_clicks'),
+    Input('clear-metabolite-ratios', 'n_clicks'),
+    Input('restore-metabolite-ratios', 'n_clicks'),
+    Input({'type': 'delete-metabolite-ratio', 'index': ALL}, 'n_clicks')
+],
+[
+    State('store-data-pool', 'data'),
+    State('metabolite-ratios-container', 'children'),
+    State('store-user-metabolite-ratio-cleared', 'data')
+]
+)
+def manage_metabolite_ratios_dropdown(add_clicks, clear_clicks, restore_clicks, delete_clicks_list, pool_data, children, user_action):
+    ctx = callback_context
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if 'delete-metabolite-ratio' in button_id:
+        # Correctly extract the index of the delete button that was clicked
+        # Since delete_clicks_list is a list of all delete button clicks, find which had a recent click
+        delete_indices = [i for i, n_clicks in enumerate(delete_clicks_list) if n_clicks is not None]
+        if not delete_indices:
+            raise PreventUpdate
+        # Assuming only one button can be clicked at a time, take the first index
+        index_to_delete = delete_indices[0]
+        # Remove the corresponding child
+        children = [child for i, child in enumerate(children) if i != index_to_delete]
+        return children, no_update
+
+    # Handle clear ratios button click
+    if button_id == 'clear-metabolite-ratios' and clear_clicks:
+        # Clear the children and update the store to indicate the user action
+        return [], {'cleared': True}
+    
+    if pool_data is None:
+        # If no data is uploaded, do not update children, but reset the cleared flag if restoring
+        if button_id == 'restore-metabolite-ratios' and restore_clicks:
+            return children, {'cleared': False}
+        return children, no_update
+
+    pool_json_file = io.StringIO(pool_data)
+    df_pool = pd.read_json(pool_json_file, orient='split')
+    met_list = df_pool['Compound'].tolist()
+
+    # Optionally check for first initialization or restoring after a clear action
+    if button_id == 'restore-metabolite-ratios' and restore_clicks:
+        # Generate placeholder ratios based on the default list and available metabolites
+            applicable_placeholders = [ratio for ratio in metabolite_ratios_default if ratio['numerator'] in met_list and ratio['denominator'] in met_list]
+            children = [create_metabolite_ratio_dropdown(i, met_list=met_list, default_ratio=ratio) for i, ratio in enumerate(applicable_placeholders)]
+            return children, {'cleared': False}
+
+    # Handle add metabolite ratio button click
+    if button_id == 'add-metabolite-ratio' and add_clicks:
+        new_element_id = len(children)
+        new_dropdown_row = create_metabolite_ratio_dropdown(new_element_id, met_list=met_list)
+        children.append(new_dropdown_row)
+        return children, {'cleared': False}  # Maintain the current state of the cleared flag
+
+    # No update required
+    return children, no_update
+
+
+def create_metabolite_ratio_dropdown(index, met_list, default_ratio=None):
+    
+    # Generate options based on met_list while excluding unwanted metabolites
+    options = [{'label': met, 'value': met} for met in met_list if not any(met.startswith(exclude) for exclude in normalization_preselected)]
+    
+    numerator_value = default_ratio['numerator'] if default_ratio else None
+    denominator_value = default_ratio['denominator'] if default_ratio else None
+    
+    return html.Div([
+        dbc.Row([
+            dbc.Col(dcc.Dropdown(
+                id={'type': 'metabolite-ratio-dynamic-dropdown-numerator', 'index': index},
+                options=options,
+                value=numerator_value,
+                placeholder="Select numerator"
+            ), style={'padding': '5px', 'margin': '5px'}),
+            dbc.Col(html.Div(" / "), style={'textAlign': 'center'}, width=1),
+            dbc.Col(dcc.Dropdown(
+                id={'type': 'metabolite-ratio-dynamic-dropdown-denominator', 'index': index},
+                options=options,
+                value=denominator_value,
+                placeholder="Select denominator"
+            ), style={'padding': '5px', 'margin': '5px'}),
+            dbc.Col(dbc.Button(
+                        "Del", id={'type': 'delete-metabolite-ratio', 'index': index},
+                        color="danger", 
+                        className="mb-3",
+                        style={'padding-top': '5px', 'margin-top': '5px'}),
+                    width=1,
+                    )
+        ], justify='center', align='center'),
+    ])
+    
+    
+@app.callback(
+    Output('store-metabolite-ratios', 'data'),
+    Input('update-metabolite-ratios', 'n_clicks'),
+[
+    State({'type': 'metabolite-ratio-dynamic-dropdown-numerator', 'index': ALL}, 'value'),
+    State({'type': 'metabolite-ratio-dynamic-dropdown-denominator', 'index': ALL}, 'value')
+]
+)
+def store_metabolite_ratios_selection(n_clicks, numerators, denominators):
+    if n_clicks is None or n_clicks < 1:
+        return no_update
+
+    # Create a list of ratios where both numerator and denominator are present
+    stored_ratios = [
+        {'numerator': num, 'denominator': denom}
+        for num, denom in zip(numerators, denominators)
+        if num and denom  # Ensure both parts of the ratio are not None or empty
+    ]
+
+    return stored_ratios

@@ -154,3 +154,4 @@ def map_button_to_modal(button_id, current_modal_states):
     if button_id in current_modal_states:
         current_modal_states[button_id] = not current_modal_states[button_id]  # Toggle state
     return current_modal_states
+

@@ -63,6 +63,7 @@ def read_excel_file(decoded_content, required_sheet):
         error_message = f"\nNo '{required_sheet}' sheet found in the uploaded file."
         print(current_timestamp(), error_message)
         raise ValueError(error_message)
+    
     return pd.read_excel(xls, sheet_name=required_sheet)
 
 

@@ -233,3 +233,12 @@ other,xylulose
 ,
 succilation,S-(1;2-Dicarboxyethyl)glutathione
 succilation,S-(2-Succinyl)-L-cysteine
+,
+metabolite ratios,Refer to "Configure Metabolite Ratios for your selection"
+metabolite ratios,Default are the following:
+metabolite ratios,alpha-ketoglutarate / succinate
+metabolite ratios,fumarate / malate
+metabolite ratios,AMP / ADP
+metabolite ratios,NAD+ / NADH
+metabolite ratios,NADP+ / NADPH
+metabolite ratios,GSH / GSSG

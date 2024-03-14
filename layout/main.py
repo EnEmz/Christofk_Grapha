@@ -32,6 +32,15 @@ def get_main_layout():
         
         dbc.Row([
             dbc.Col(
+                create_button("Configure Metabolite Ratios",
+                              "open-metabolite-ratios",
+                              color='secondary'),
+                className='just-a-button'
+            )
+        ]),
+        
+        dbc.Row([
+            dbc.Col(
                 create_button("Select Metabolite Classes to be Displayed",
                               "open-classes"),
                 className='just-a-button'

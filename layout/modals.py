@@ -5,10 +5,12 @@ import dash_ag_grid as dag
 from dash import dcc, html
 
 from layout.config import classes_options_w_mets, tooltips, met_class_list_preselected
-
+from layout.utilities_layout import create_button
 
 def build_modal_components():
     modal_components = []
+    
+    modal_components.append(get_metabolite_ratio_modal())
     
     modal_components.append(get_data_order_modal())
     modal_components.append(get_metabolite_class_modal())
@@ -27,6 +29,48 @@ def build_modal_components():
     modal_components.append(get_settings_modal_lingress())
     
     return modal_components
+
+
+# Function to create metabolite ratio modal
+def get_metabolite_ratio_modal():
+    return dbc.Modal(
+        children=
+        [
+            dbc.ModalHeader("Change Metabolite Ratios that are to be displayed."),
+            dbc.ModalBody([
+                dbc.Row([
+                    dbc.Col(html.Div(id='metabolite-ratios-container', children=[]))
+                ],
+                justify='center',
+                align='center'),
+                dbc.Row([
+                    dbc.Col(dbc.Button("Add Metabolite Ratio", id="add-metabolite-ratio", n_clicks=0, color="info"), 
+                            className='just-a-button')
+                ],
+                justify='center',
+                align='center'),
+            ]),
+            dbc.ModalFooter([
+                dbc.Row([
+                    dbc.Col(
+                        create_button("Clear", "clear-metabolite-ratios", color='warning'),
+                        style={"text-align": "center"}
+                    ),
+                    dbc.Col(
+                        create_button("Default", 'restore-metabolite-ratios', color='secondary'),
+                        style={"text-align": "center"}
+                    ),
+                    dbc.Col(
+                        create_button("Update", "update-metabolite-ratios", color='success'),
+                        style={"text-align": "center"}
+                    )
+                ])
+            ])
+        ],
+        id="modal-metabolite-ratios",
+        size="xl",
+        is_open=False
+    )
 
 
 # Function to create data order modal
@@ -1048,6 +1092,11 @@ def get_pvalue_modal_bulk_metabolomics():
                     dbc.ModalFooter([
                         dbc.Row([
                             dbc.Col(
+                                html.Div(id='p-value-metabolomics-correction-dropdown'),
+                                width=3,
+                                style={"text-align": "center"}
+                            ),
+                            dbc.Col(
                                 # Option to display calculated numerical p value.
                                 dbc.Checklist(
                                     options=[
@@ -1057,19 +1106,19 @@ def get_pvalue_modal_bulk_metabolomics():
                                     inline=True,
                                     value=[]
                                 ),
-                                width=4,
+                                width=3,
                                 style={"text-align": "center"}
                             ),
                             dbc.Col(
                                 dbc.Button("Clear All", id="clear-p-value-metabolomics", n_clicks=0),
-                                width=4,
+                                width=3,
                                 style={"text-align": "center"}
                             ),
                             dbc.Col(
                                 dbc.Button("Update", id="update-p-value-metabolomics", n_clicks=0, color="success"),
-                                width=4,
+                                width=3,
                                 style={"text-align": "center"}
-                            ),
+                            )
                         ]),
                     ])
                 ],
@@ -1091,7 +1140,8 @@ def get_pvalue_modal_isotopologue_distribution():
                         justify='center',
                         align='center'),
                         dbc.Row([
-                            dbc.Col(dbc.Button("Add p-value Comparison", id="add-pvalue-isotopologue-distribution-dropdown", n_clicks=0, color="info"), className='just-a-button')
+                            dbc.Col(dbc.Button("Add p-value Comparison", id="add-pvalue-isotopologue-distribution-dropdown", n_clicks=0, color="info"), 
+                                    className='just-a-button')
                         ],
                         justify='center',
                         align='center'),
