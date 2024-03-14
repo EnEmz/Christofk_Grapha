@@ -10,7 +10,7 @@ from dash import html, dcc, callback_context, no_update
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_group_significance, transform_log2_and_adjust_control_data, generate_individual_heatmap
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_group_significance, transform_log2_and_adjust_control_data, generate_individual_heatmap, compile_met_pool_ratio_data
 
 @app.callback(
 [
@@ -71,11 +71,12 @@ def update_heatmap_dropdown_options(grouped_samples):
     State('store-data-normalization', 'data'),
     State('store-data-order', 'data'),
     State('bulk-heatmap-control-group-dropdown', 'value'),
-    State('store-bulk-heatmap-settings', 'data')
+    State('store-bulk-heatmap-settings', 'data'),
+    State('store-metabolite-ratios', 'data')
 ],
     prevent_initial_call=True
 )
-def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalization, met_groups, ctrl_group, settings):
+def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalization, met_groups, ctrl_group, settings, met_ratio_selection):
     '''
     Display the heatmap plot based on user-selected parameters and provided data. 
     The function also stores a JSON representation of the plot for later use.
@@ -96,6 +97,8 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
         Selected control group for the bulk heatmap.
     settings: dict
         Selected or placeholder settings for the bulk heatmap
+    met_ratio_selection : list
+        List of dictionaries for user selected metabolite ratios
         
     Returns:
     -------
@@ -164,6 +167,12 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
         # Applying various data processing steps on the dataframe
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
         df_pool_normalized_grouped = group_met_pool_data(df_pool_normalized, selected_met_classes)
+        
+        # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
+        # compiled and added to the end of the pool data dataframe
+        if 'metabolite ratios' in selected_met_classes:
+            df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
+            df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         
         group_significance = generate_group_significance(df_pool_normalized_grouped, grouped_samples)
 

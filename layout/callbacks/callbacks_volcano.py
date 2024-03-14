@@ -13,7 +13,7 @@ from dash import dcc, no_update, callback_context
 from app import app
 from layout.toast import generate_toast
 from layout.utilities_layout import generate_available_dropdown_options
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, ttest_volcano, assign_color, generate_volcano_plot, calculate_offsets_for_volcano_annotations
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, ttest_volcano, assign_color, generate_volcano_plot, compile_met_pool_ratio_data
 
 @app.callback(
 [
@@ -109,11 +109,21 @@ def update_volcano_dropdown_options(grouped_samples, volcano_control_group, volc
     State('store-met-groups', 'data'),
     State('volcano-control-group-dropdown', 'value'),
     State('volcano-condition-group-dropdown', 'value'),
-    State('store-volcano-settings', 'data')
+    State('store-volcano-settings', 'data'),
+    State('store-metabolite-ratios', 'data')
 ],
     prevent_initial_call = True
 )
-def display_volcano_plot(n_clicks, search_value, pool_data, met_classes, met_normalization, met_groups, ctrl_group, cond_group, settings):
+def display_volcano_plot(n_clicks, 
+                         search_value, 
+                         pool_data, 
+                         met_classes, 
+                         met_normalization, 
+                         met_groups, 
+                         ctrl_group, 
+                         cond_group, 
+                         settings, 
+                         met_ratio_selection):
     '''
     Generates and displays the volcano plot based on the user inputs and selected parameters.
     
@@ -145,6 +155,9 @@ def display_volcano_plot(n_clicks, search_value, pool_data, met_classes, met_nor
         
     settings : dict
         Settings to customize the generated volcano plot.
+        
+    met_ratio_selection : list
+        List of dictionaries for user selected metabolite ratios
         
     Returns:
     -------
@@ -213,6 +226,13 @@ def display_volcano_plot(n_clicks, search_value, pool_data, met_classes, met_nor
         # Normalizing and grouping the data
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
         df_pool_normalized_grouped = group_met_pool_data(df_pool_normalized, selected_met_classes)
+        
+        # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
+        # compiled and added to the end of the pool data dataframe
+        if 'metabolite ratios' in selected_met_classes:
+            df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
+            df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
+        
         df_pool_normalized_grouped.drop('pathway_class', axis=1, inplace=True)
         
         # Creating a new dataframe to keep the data for volcano plot

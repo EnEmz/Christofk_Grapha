@@ -30,7 +30,15 @@ from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data
 ],
     prevent_initial_call=True
 )
-def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalization, met_groups, pvalue_info, settings, met_ratio_selection):
+def display_met_data(n_clicks, 
+                     pool_data, 
+                     iso_data, 
+                     met_classes, 
+                     met_normalization, 
+                     met_groups, 
+                     pvalue_info, 
+                     settings, 
+                     met_ratio_selection):
     """
     Generates and displays metabolomics data visualizations based on various user inputs and selections.
     
@@ -51,6 +59,8 @@ def display_met_data(n_clicks, pool_data, iso_data, met_classes, met_normalizati
         P-value settings and configurations.
     settings : dict
         Additional settings for the visualizations.
+    met_ratio_selection : list
+        List of dictionaries for user selected metabolite ratios
     
     Returns:
     html.Div
