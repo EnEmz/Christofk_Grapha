@@ -8,7 +8,7 @@ from dash.dependencies import Input, Output, State
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_lingress_plot
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_lingress_plot, compile_met_pool_ratio_data
 
 
 @app.callback(
@@ -62,11 +62,20 @@ def update_lingress_dropdown_options(lingress_data):
     State('store-met-classes', 'data'),
     State('store-data-normalization', 'data'),
     State('store-data-order', 'data'),
-    State('store-settings-lingress', 'data')
+    State('store-settings-lingress', 'data'),
+    State('store-metabolite-ratios', 'data')
 ],
     prevent_initial_call = True
 )
-def display_lingress_plots(n_clicks, var_name, lingress_data, pool_data, met_classes, met_normalization, met_groups, settings):
+def display_lingress_plots(n_clicks, 
+                           var_name, 
+                           lingress_data, 
+                           pool_data, 
+                           met_classes, 
+                           met_normalization, 
+                           met_groups, 
+                           settings, 
+                           met_ratio_selection):
     '''
     Display an isotopologue distribution plot based on user-selected parameters and provided data.
     This function is triggered by the 'generate-isotopologue-distribution' button and creates a bar chart 
@@ -159,8 +168,17 @@ def display_lingress_plots(n_clicks, var_name, lingress_data, pool_data, met_cla
         normalization_list = met_normalization['selected_values']
         selected_met_classes = met_classes['selected_values']
         
+        # Normalize the data based on the selected normalization variables
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
+        
+        # Filter pool data based on selected metabolite classes
         df_pool_normalized_grouped = group_met_pool_data(df_pool_normalized, selected_met_classes)
+        
+        # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
+        # compiled and added to the end of the pool data dataframe
+        if 'metabolite ratios' in selected_met_classes and met_ratio_selection is not None:
+            df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
+            df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         
         df_pool_normalized_groupby = df_pool_normalized_grouped.groupby('pathway_class', sort=False)
                

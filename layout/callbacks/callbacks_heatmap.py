@@ -170,7 +170,7 @@ def display_bulk_heatmap_plot(n_clicks, pool_data, met_classes, met_normalizatio
         
         # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
         # compiled and added to the end of the pool data dataframe
-        if 'metabolite ratios' in selected_met_classes:
+        if 'metabolite ratios' in selected_met_classes and met_ratio_selection is not None:
             df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
             df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         

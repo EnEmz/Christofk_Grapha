@@ -134,14 +134,12 @@ def display_met_data(n_clicks,
         # Normalize the data based on the selected normalization variables
         df_pool_normalized = normalize_met_pool_data(df_pool, grouped_samples, normalization_list)
         
-        
-        
         # Filter pool data based on selected metabolite classes
         df_pool_normalized_grouped = group_met_pool_data(df_pool_normalized, selected_met_classes)
         
         # If metabolite ratios are in the selected sample class, then the metabolite ratio dataframe is
         # compiled and added to the end of the pool data dataframe
-        if 'metabolite ratios' in selected_met_classes:
+        if 'metabolite ratios' in selected_met_classes and met_ratio_selection is not None:
             df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
             df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         

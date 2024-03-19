@@ -1721,6 +1721,10 @@ def store_metabolite_ratios_selection(n_clicks, numerators, denominators):
     
     if n_clicks is None or n_clicks < 1:
         return no_update
+    
+    # Check if all numerators and denominators are None or empty
+    if all(num is None or num == '' for num in numerators) and all(denom is None or denom == '' for denom in denominators):
+        return None  # Return None for the entire store value if no selections have been made
 
     # Create a list of ratios where both numerator and denominator are present
     stored_ratios = [
