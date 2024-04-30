@@ -1543,16 +1543,6 @@ def store_iso_distribution_selection(n_clicks, checked_values, ids, met_name):
     
     else:
         return None
-    
-    
-# @app.callback(
-# [
-#     Output('p-value-metabolomics-correction-dropdown', 'children')
-# ],
-
-# )
-# def create_pvalue_correction_dropdowns():
-#     pass
 
 
 @app.callback(

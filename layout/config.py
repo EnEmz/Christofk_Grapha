@@ -87,9 +87,9 @@ iso_color_palette = [
 ]
 
 p_value_correction_options = [
-        'None',
-        'Benjamini-Hochberg',
-        'Bonferroni'  
+    {"label": "None", "value": "none"},
+    {"label": "Bonferroni", "value": "bonferroni"},
+    {"label": "Benjamini-Hochberg", "value": "benjamini-hochberg"}
 ]
 
 

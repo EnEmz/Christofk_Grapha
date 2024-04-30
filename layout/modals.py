@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
 from dash import dcc, html
 
-from layout.config import classes_options_w_mets, tooltips, met_class_list_preselected
+from layout.config import classes_options_w_mets, tooltips, met_class_list_preselected, p_value_correction_options
 from layout.utilities_layout import create_button
 
 def build_modal_components():
@@ -1092,9 +1092,12 @@ def get_pvalue_modal_bulk_metabolomics():
                     dbc.ModalFooter([
                         dbc.Row([
                             dbc.Col(
-                                html.Div(id='p-value-metabolomics-correction-dropdown'),
-                                width=3,
-                                style={"text-align": "center"}
+                                dcc.Dropdown(
+                                    id='bulk-metabolomics-pvalue-correction-selection',
+                                    options=p_value_correction_options,
+                                    value=p_value_correction_options[0]
+                                ),
+                                width=5
                             ),
                             dbc.Col(
                                 # Option to display calculated numerical p value.
@@ -1111,12 +1114,12 @@ def get_pvalue_modal_bulk_metabolomics():
                             ),
                             dbc.Col(
                                 dbc.Button("Clear All", id="clear-p-value-metabolomics", n_clicks=0),
-                                width=3,
+                                width=2,
                                 style={"text-align": "center"}
                             ),
                             dbc.Col(
                                 dbc.Button("Update", id="update-p-value-metabolomics", n_clicks=0, color="success"),
-                                width=3,
+                                width=2,
                                 style={"text-align": "center"}
                             )
                         ]),
