@@ -1095,7 +1095,7 @@ def get_pvalue_modal_bulk_metabolomics():
                                 dcc.Dropdown(
                                     id='bulk-metabolomics-pvalue-correction-selection',
                                     options=p_value_correction_options,
-                                    value=p_value_correction_options[0]
+                                    value='none'
                                 ),
                                 width=5
                             ),
@@ -1154,6 +1154,14 @@ def get_pvalue_modal_isotopologue_distribution():
                     dbc.ModalFooter([
                         dbc.Row([
                             dbc.Col(
+                                dcc.Dropdown(
+                                    id='isotopologue-distribution-pvalue-correction-selection',
+                                    options=p_value_correction_options,
+                                    value='none'
+                                ),
+                                width=5
+                            ),
+                            dbc.Col(
                             dbc.Checklist(
                                 options=[
                                         {"label": "Display numerical p-value", "value": 1}
@@ -1162,17 +1170,17 @@ def get_pvalue_modal_isotopologue_distribution():
                                 inline=True,
                                 value=[]
                             ),
-                            width=4,
+                            width=3,
                             style={"text-align": "center"}
                             ),
                             dbc.Col(
                                 dbc.Button("Clear All", id="clear-p-value-isotopologue-distribution", n_clicks=0),
-                                width=4,
+                                width=2,
                                 style={"text-align": "center"}
                             ),
                             dbc.Col(
                                 dbc.Button("Update", id="update-p-value-isotopologue-distribution", n_clicks=0, color="success"),
-                                width=4,
+                                width=2,
                                 style={"text-align": "center"}
                             )
                         ]),
