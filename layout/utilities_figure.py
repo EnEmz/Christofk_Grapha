@@ -566,8 +566,6 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
         else:
             results_df[column_name] = [np.nan] * len(df)  # If no valid p-values, assign all NaN
 
-    print(results_df)
-
     return results_df
 
 
