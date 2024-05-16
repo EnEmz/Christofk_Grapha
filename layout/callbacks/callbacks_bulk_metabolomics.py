@@ -9,7 +9,7 @@ from dash import html, dcc, no_update, callback_context
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_met_iso_figure, add_p_value_annotations_iso, generate_single_met_pool_figure, add_p_value_annotations_pool, compile_met_pool_ratio_data
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, generate_single_met_iso_figure, add_p_value_annotations_iso, generate_single_met_pool_figure, add_p_value_annotations_pool, compile_met_pool_ratio_data, generate_corrected_pvalues
 
 
 @app.callback(
@@ -143,9 +143,34 @@ def display_met_data(n_clicks,
             df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
             df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         
+
+        # Read pvalue information submitted by the user
+        if pvalue_info is not None:
+            pvalue_comparisons = pvalue_info['combinations']
+            pvalue_numerical = pvalue_info['numerical_bool']
+            pvalue_correction = pvalue_info['pvalue_correction']
+
+            # Generate corrected pvalue dataframe if it correction method was selected
+            if pvalue_correction != 'none':
+                corrected_pvalues_pool = generate_corrected_pvalues(df_pool_normalized_grouped, grouped_samples, pvalue_comparisons, pvalue_correction)
+                corrected_pvalues_pool = None
+                # if iso_present is True:
+                #     corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction)
+                # else:
+                #     corrected_pvalues_iso = None
+            else:
+                corrected_pvalues_pool = None
+
+
+
+
+
         df_pool_normalized_groupby = df_pool_normalized_grouped.groupby('pathway_class', sort=False)
                
         figures_mets = []
+
+
+
         # Iterate over each group of pathway_class
         for pathway, group_df in df_pool_normalized_groupby:
             
@@ -178,8 +203,6 @@ def display_met_data(n_clicks,
                     # Add p-value components to the graph if the user stored comparison
                     if pvalue_info is not None:
 
-                        pvalue_comparisons = pvalue_info['combinations']
-                        pvalue_numerical = pvalue_info['numerical_bool']
                         figure_met_iso = add_p_value_annotations_iso(figure_met_iso, df_met_iso, grouped_samples, pvalue_comparisons, pvalue_numerical, settings)
                         
                     dbc_row.children.append(dbc.Col(
@@ -199,12 +222,10 @@ def display_met_data(n_clicks,
                 figure_met_pool = generate_single_met_pool_figure(df_met_pool, grouped_samples, settings)
                 pool_filename = 'pool_' + str(met_name)
                 
+
                 # Add p-value components to the graph if the user stored comparison
                 if pvalue_info is not None:
-                    
-                    pvalue_comparisons = pvalue_info['combinations']
-                    pvalue_numerical = pvalue_info['numerical_bool']
-                    figure_met_pool = add_p_value_annotations_pool(figure_met_pool, pvalue_comparisons, pvalue_numerical, settings)
+                    figure_met_pool = add_p_value_annotations_pool(figure_met_pool, pvalue_comparisons, pvalue_numerical, corrected_pvalues_pool, settings)
                     
                 # Add the pool data graph as a dbc Col to the dbc Row
                 dbc_row.children.append(dbc.Col(

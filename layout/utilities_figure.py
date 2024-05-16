@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.stats import linregress
+from statsmodels.stats.multitest import multipletests
 
 from layout.config import iso_color_palette
 from layout.config import df_met_group_list
@@ -169,7 +170,7 @@ def update_metabolomics_figure_layout(fig, array_columns, settings):
 def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_present):
     '''
     Calculates the p-value of the two sets of observations and determines the appropriate
-    annotation symbol to display on the plot.
+    annotation symbol to display on the plot. Handles edge cases such as zero variance or insufficient data.
 
     Parameters:
     ----------
@@ -188,30 +189,42 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_presen
         A string representing the p-value annotation.
     '''
     
+    # Filter out zero values
     filtered_y0_data = y0_data[y0_data != 0]
     filtered_y1_data = y1_data[y1_data != 0]
     
-    # Check variance
-    if np.var(filtered_y0_data) == 0 or np.var(filtered_y1_data) == 0:
-        if np.mean(filtered_y0_data) == np.mean(filtered_y1_data):
-            # Identical means and no variance
-            return 'identical'
-        else:
-            # Different means but no variance within one or both groups
-            return 'zero-var'
-        
-    pvalue = stats.ttest_ind(filtered_y0_data, 
-                            filtered_y1_data, 
-                            equal_var=True, 
-                            nan_policy='omit',
-                            alternative='two-sided')[1]
+    # Handle cases with insufficient data
+    if len(filtered_y0_data) < 2 or len(filtered_y1_data) < 2:
+        return "ins data"
     
-    symbol = '***' if pvalue < 0.001 else '**' if pvalue < 0.01 else '*' if pvalue < 0.05 else 'ns'
+    # Check variance and identical means
+    if np.var(filtered_y0_data) == 0 or np.var(filtered_y1_data) == 0:
+        if np.all(filtered_y0_data == filtered_y1_data):
+            return "identical"  # Identical means and no variance
+        else:
+            return "zero var"  # Different means but no variance within one or both groups
+    
+    # Perform t-test
+    pvalue = perform_two_sided_ttest(filtered_y0_data, filtered_y1_data)
+    
+    # Determine the symbol to display based on p-value
+    if pvalue < 0.001:
+        symbol = '***'
+    elif pvalue < 0.01:
+        symbol = '**'
+    elif pvalue < 0.05:
+        symbol = '*'
+    else:
+        symbol = 'ns'
+    
+    # If numerical output is requested and the p-value is above a certain threshold, show the exact p-value
     if numerical_present and pvalue >= 0.0001:
-        symbol = f"p = {round(pvalue, 4)}"
+        symbol = f"p = {pvalue:.4f}"
     elif numerical_present:
         symbol = "p < 0.0001"
+    
     return symbol
+
 
 # Adapted from https://stackoverflow.com/questions/67505252/plotly-box-p-value-significant-annotation
 def add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings, y_range, adjusted_text_offset, color='black'):
@@ -273,7 +286,7 @@ def add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings,
     ))
 
 
-def add_p_value_annotations_pool(fig, array_columns, numerical_present, settings, color='black'):
+def add_p_value_annotations_pool(fig, array_columns, numerical_present, pvalue_correction, settings, color='black'):
     ''' 
     Adds p-value annotations to the metabolomics pool data represented as a box plot
     within a given Plotly figure. It adjusts the plot's height based on the number of
@@ -287,6 +300,8 @@ def add_p_value_annotations_pool(fig, array_columns, numerical_present, settings
         An array specifying pairs of column indices to be compared for p-values.
     numerical_present : bool
         Whether to show the numerical p-value on the plot.
+    pvalue_correction : str
+        User selected string of pvalue corrections to be used in the metabolomics pool figure.
     settings : dict
         A dictionary to configure plot attributes like font style and size.
         Must contain 'height' for space calculations.
@@ -302,7 +317,7 @@ def add_p_value_annotations_pool(fig, array_columns, numerical_present, settings
     # Adjust the height of the plot for the amount of pvalue annotations and get the adjusted 
     # vlues for the pvalue display
     adjusted_interline, adjusted_text_offset = update_metabolomics_figure_layout(fig, array_columns, settings)
- 
+
     # Specify in what y_range to plot for each pair of columns
     y_range = np.zeros([len(array_columns), 2])
     for i in range(len(array_columns)):
@@ -496,7 +511,80 @@ def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_colum
         add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings, y_range, adjusted_text_offset, color)
     
     return fig
+
+
+def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_method):
+    """
+    Calculates p-values for given comparisons across all metabolites, applies a p-value correction,
+    and compiles results into a single DataFrame with one column per comparison, retaining specified columns.
+    """
+    # Identify columns that should be numeric (all sample columns)
+    numeric_columns = [col for group in grouped_samples.values() for col in group]
+
+    # Apply pd.to_numeric strictly to numeric columns and ensure conversion
+    df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
+
+    # Initialize results_df with the metabolite information
+    base_columns = ['Compound', 'C_Label'] if 'C_Label' in df.columns else ['Compound']
+    results_df = df[base_columns].copy()
+
+    keys_list = list(grouped_samples.keys())
+
+    print(comparisons)
+
+    for comp_pair in comparisons:
+        # Create a column name directly from the comparison indices
+        column_name = str(comp_pair)
+        p_values = []
+
+        for index, row in df.iterrows():
+            group1_columns = grouped_samples[keys_list[comp_pair[0]]]
+            group2_columns = grouped_samples[keys_list[comp_pair[1]]]
+
+            # Convert row slices to numeric to ensure proper type for statistical tests
+            data_group1 = pd.to_numeric(row[group1_columns], errors='coerce').dropna()
+            data_group2 = pd.to_numeric(row[group2_columns], errors='coerce').dropna()
+
+            pvalue = perform_two_sided_ttest(data_group1, data_group2)
+
+            p_values.append(pvalue)
+
+        # Correct p-values, ignoring NaN
+        valid_pvalues = [p for p in p_values if not np.isnan(p)]
+        if valid_pvalues:  # There are valid p-values to correct
+            corrected_pvalues = apply_pvalue_correction(valid_pvalues, correction_method)
+            # Reinsert corrected p-values into the full list, maintaining positions of NaNs
+            corrected_full = []
+            j = 0
+            for p in p_values:
+                if np.isnan(p):
+                    corrected_full.append(np.nan)
+                else:
+                    corrected_full.append(corrected_pvalues[j])
+                    j += 1
+            results_df[column_name] = corrected_full
+        else:
+            results_df[column_name] = [np.nan] * len(df)  # If no valid p-values, assign all NaN
+
+    print(results_df)
+
+    return results_df
+
+
+def apply_pvalue_correction(pvalues, correction_method):
+    """
+    Apply multiple testing p-value correction methods.
     
+    Parameters:
+    - pvalues (list): A list of p-values to correct.
+    - method (str): The correction method; 'bonferroni', 'fdr_bh' etc.
+    
+    Returns:
+    - array: Corrected p-values.
+    """
+    corrected_pvalues = multipletests(pvalues, alpha=0.05, method=correction_method)[1]
+    return corrected_pvalues
+
 
 def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
     '''
@@ -786,24 +874,14 @@ def ttest_volcano(row, ctrl_cols, cond_cols):
     ctrl_values = pd.to_numeric(row[ctrl_cols], errors='coerce').dropna() 
     cond_values = pd.to_numeric(row[cond_cols], errors='coerce').dropna()
     
-    # Ensure that there are values present in both the control and condition groups for the t-test
-    if len(ctrl_values) > 0 and len(cond_values) > 0:
-        
-        # Perform an independent two-sided t-test, assuming equal variance,
-        # between the control and condition groups
-        filtered_ctrl_values = ctrl_values[ctrl_values != 0]
-        filtered_cond_values = cond_values[cond_values != 0]
+    # Perform an independent two-sided t-test, assuming equal variance,
+    # between the control and condition groups
+    filtered_ctrl_values = ctrl_values[ctrl_values != 0]
+    filtered_cond_values = cond_values[cond_values != 0]
 
-        pvalue = stats.ttest_ind(filtered_ctrl_values, 
-                                filtered_cond_values, 
-                                equal_var=True, 
-                                nan_policy='omit',
-                                alternative='two-sided')[1]
-        
-        return pvalue
+    pvalue = perform_two_sided_ttest(filtered_ctrl_values, filtered_cond_values)
     
-    else:  # If there are not enough values for the t-test, return NaN
-        return np.nan
+    return pvalue
 
 
 def assign_color(row, FC_cutoff, third_pvalue_cutoff, second_pvalue_cutoff, first_pvalue_cutoff, settings):
@@ -1383,27 +1461,7 @@ def generate_group_significance(df_pool, grouped_samples):
             filtered_data1 = data1[data1 != 0]
             filtered_data2 = data2[data2 != 0]
 
-            # Skip the test if there's not enough data
-            if filtered_data1.empty or filtered_data2.empty or len(filtered_data1) < 2 or len(filtered_data2) < 2:
-                continue
-            
-            # Check variance
-            if np.var(filtered_data1) == 0 or np.var(filtered_data2) == 0:
-                if np.mean(filtered_data1) == np.mean(filtered_data2):
-                    # Identical means and no variance
-                    continue
-                else:
-                    # Different means but no variance within one or both groups
-                    continue
-                
-            
-
-            pvalue = stats.ttest_ind(filtered_data1, 
-                                    filtered_data2, 
-                                    equal_var=True, 
-                                    nan_policy='omit',
-                                    alternative='two-sided')[1]
-
+            pvalue = perform_two_sided_ttest(filtered_data1, filtered_data2)
 
             # If p-value < 0.05, store it, ensuring that duplicates are not added
             if pvalue < 0.05:
@@ -1814,3 +1872,22 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
     }
 
     return fig, stats
+
+
+def perform_two_sided_ttest(group_1, group_2):
+
+    if len(group_1) > 1 and len(group_2) > 1:
+        if np.var(group_1) != np.var(group_2):
+
+            pvalue = stats.ttest_ind(group_1, 
+                                    group_2, 
+                                    equal_var=True, 
+                                    nan_policy='omit',
+                                    alternative='two-sided')[1]
+            
+        else:
+            pvalue = np.nan
+    else:
+        pvalue = np.nan
+
+    return pvalue
