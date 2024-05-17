@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution
+from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution, generate_corrected_pvalues
 
 
 @app.callback(
@@ -152,7 +152,21 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
         if pvalue_info is not None:
             pvalue_comparisons = pvalue_info['combinations']
             pvalue_numerical = pvalue_info['numerical_bool']
-            fig = add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, pvalue_comparisons, pvalue_numerical, settings)
+            pvalue_correction = pvalue_info['pvalue_correction']
+
+            if pvalue_correction != 'none':
+                corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction)
+                print(corrected_pvalues_iso)
+
+
+            fig = add_p_value_annotations_iso_distribution(fig, 
+                                                           df_iso_met, 
+                                                           met_name,
+                                                           grouped_samples, 
+                                                           pvalue_comparisons, 
+                                                           pvalue_numerical, 
+                                                           corrected_pvalues_iso,
+                                                           settings)
 
         filename = 'iso_distribution_' + str(met_name)
         

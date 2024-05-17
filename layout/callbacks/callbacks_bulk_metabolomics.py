@@ -153,16 +153,12 @@ def display_met_data(n_clicks,
             # Generate corrected pvalue dataframe if it correction method was selected
             if pvalue_correction != 'none':
                 corrected_pvalues_pool = generate_corrected_pvalues(df_pool_normalized_grouped, grouped_samples, pvalue_comparisons, pvalue_correction)
-                corrected_pvalues_pool = None
-                # if iso_present is True:
-                #     corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction)
-                # else:
-                #     corrected_pvalues_iso = None
+                if iso_present is True:
+                    corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction)
+                else:
+                    corrected_pvalues_iso = None
             else:
                 corrected_pvalues_pool = None
-
-
-
 
 
         df_pool_normalized_groupby = df_pool_normalized_grouped.groupby('pathway_class', sort=False)
@@ -202,8 +198,14 @@ def display_met_data(n_clicks,
                     
                     # Add p-value components to the graph if the user stored comparison
                     if pvalue_info is not None:
-
-                        figure_met_iso = add_p_value_annotations_iso(figure_met_iso, df_met_iso, grouped_samples, pvalue_comparisons, pvalue_numerical, settings)
+                        figure_met_iso = add_p_value_annotations_iso(figure_met_iso, 
+                                                                     df_met_iso, 
+                                                                     met_name,
+                                                                     grouped_samples, 
+                                                                     pvalue_comparisons, 
+                                                                     pvalue_numerical, 
+                                                                     corrected_pvalues_iso, 
+                                                                     settings)
                         
                     dbc_row.children.append(dbc.Col(
                                                 dcc.Graph(
@@ -225,7 +227,12 @@ def display_met_data(n_clicks,
 
                 # Add p-value components to the graph if the user stored comparison
                 if pvalue_info is not None:
-                    figure_met_pool = add_p_value_annotations_pool(figure_met_pool, pvalue_comparisons, pvalue_numerical, corrected_pvalues_pool, settings)
+                    figure_met_pool = add_p_value_annotations_pool(figure_met_pool, 
+                                                                   met_name,
+                                                                   pvalue_comparisons, 
+                                                                   pvalue_numerical, 
+                                                                   corrected_pvalues_pool, 
+                                                                   settings)
                     
                 # Add the pool data graph as a dbc Col to the dbc Row
                 dbc_row.children.append(dbc.Col(

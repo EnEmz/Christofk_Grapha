@@ -7,6 +7,10 @@ from scipy import stats
 from scipy.stats import linregress
 from statsmodels.stats.multitest import multipletests
 
+import os
+from datetime import datetime
+import time
+
 from layout.config import iso_color_palette
 from layout.config import df_met_group_list
 
@@ -167,7 +171,7 @@ def update_metabolomics_figure_layout(fig, array_columns, settings):
     return adjusted_interline, adjusted_text_offset
 
 
-def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_present):
+def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present):
     '''
     Calculates the p-value of the two sets of observations and determines the appropriate
     annotation symbol to display on the plot. Handles edge cases such as zero variance or insufficient data.
@@ -188,21 +192,28 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_presen
     str
         A string representing the p-value annotation.
     '''
-    
+
+    # Convert pandas Series to numpy arrays to avoid index issues if necessary
+    if isinstance(y0_data, pd.Series):
+        y0_data = y0_data.values
+    if isinstance(y1_data, pd.Series):
+        y1_data = y1_data.values
+
+    # Check if all datapoints between the groups are the same
+    if np.all(y0_data == y1_data):
+        return "identical"
+
+    # Check for data variance in the same group
+    if np.var(y0_data) == 0 or np.var(y1_data) == 0:
+        return "zero var"
+
     # Filter out zero values
     filtered_y0_data = y0_data[y0_data != 0]
     filtered_y1_data = y1_data[y1_data != 0]
-    
-    # Handle cases with insufficient data
+
+    # Handle cases with insufficient data with less than 2 datapoints in either group
     if len(filtered_y0_data) < 2 or len(filtered_y1_data) < 2:
         return "ins data"
-    
-    # Check variance and identical means
-    if np.var(filtered_y0_data) == 0 or np.var(filtered_y1_data) == 0:
-        if np.all(filtered_y0_data == filtered_y1_data):
-            return "identical"  # Identical means and no variance
-        else:
-            return "zero var"  # Different means but no variance within one or both groups
     
     # Perform t-test
     pvalue = perform_two_sided_ttest(filtered_y0_data, filtered_y1_data)
@@ -223,6 +234,27 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_presen
     elif numerical_present:
         symbol = "p < 0.0001"
     
+    # If p value correction was selected, append the existing symbol with corrected p value
+    if corrected_pvalues is not None and not corrected_pvalues.empty:
+        corrected_pvalue = corrected_pvalues.at[met_name, str(column_pair)]
+
+        # Determine the symbol to display based on corrected p-value
+        if corrected_pvalue < 0.001:
+            corr_symbol = '***'
+        elif corrected_pvalue < 0.01:
+            corr_symbol = '**'
+        elif corrected_pvalue < 0.05:
+            corr_symbol = '*'
+        else:
+            corr_symbol = 'ns'
+
+        if numerical_present and corrected_pvalue >= 0.0001:
+            corr_symbol = f"q = {corrected_pvalue:.4f}"
+        elif numerical_present:
+            corr_symbol = "q < 0.0001"
+
+        symbol = symbol + ' | ' + corr_symbol
+
     return symbol
 
 
@@ -286,7 +318,7 @@ def add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings,
     ))
 
 
-def add_p_value_annotations_pool(fig, array_columns, numerical_present, pvalue_correction, settings, color='black'):
+def add_p_value_annotations_pool(fig, met_name, array_columns, numerical_present, corrected_pvalues, settings, color='black'):
     ''' 
     Adds p-value annotations to the metabolomics pool data represented as a box plot
     within a given Plotly figure. It adjusts the plot's height based on the number of
@@ -326,12 +358,12 @@ def add_p_value_annotations_pool(fig, array_columns, numerical_present, pvalue_c
 
     # Print the p-values
     for index, column_pair in enumerate(array_columns):
-        # Perform the t-test to get p-values
+        # Read the data from the figure
         y0_data = np.array(fig.data[column_pair[0]]['y']).astype(float)
         y1_data = np.array(fig.data[column_pair[1]]['y']).astype(float)
         
         # Get the pvalue annotation symbol from calculate_pvalue_and_symbol function
-        symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_present)
+        symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present)
         
         add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings, y_range, adjusted_text_offset, color='black')
     
@@ -441,9 +473,9 @@ def generate_single_met_iso_figure(df_metabolite, grouped_samples, settings):
     )
     
     return fig
-    
 
-def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_columns, numerical_present, settings, color='black'):
+
+def add_p_value_annotations_iso(fig, df_metabolite, met_name, grouped_samples, array_columns, numerical_present, corrected_pvalues, settings, color='black'):
     ''' 
     Adds p-value annotations to the metabolomics isotopologue stacked bar plot based on comparisons
     between specified groups. It adjusts the height of the plot dynamically to accommodate the
@@ -454,7 +486,7 @@ def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_colum
     fig : plotly.graph_objs._figure.Figure
         The Plotly figure object that holds the stacked bar plot.
     df_metabolite : pandas.DataFrame
-        A DataFrame containing the metabolite concentration data and isotopologue labeling.
+        A DataFrame containing the metabolite name data and isotopologue labeling.
     grouped_samples : dict
         A dictionary mapping group names to lists of sample names within those groups.
     array_columns : list of lists or np.array
@@ -506,7 +538,7 @@ def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_colum
         y1_data = df_metabolite_label[group2_sample_names].sum(axis=0)
         
         # Get the pvalue annotation symbol from calculate_pvalue_and_symbol function
-        symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_present)
+        symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present)
 
         add_pvalue_shapes_and_annotations(fig, index, column_pair, symbol, settings, y_range, adjusted_text_offset, color)
     
@@ -515,73 +547,136 @@ def add_p_value_annotations_iso(fig, df_metabolite, grouped_samples, array_colum
 
 def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_method):
     """
-    Calculates p-values for given comparisons across all metabolites, applies a p-value correction,
-    and compiles results into a single DataFrame with one column per comparison, retaining specified columns.
-    """
-    # Identify columns that should be numeric (all sample columns)
-    numeric_columns = [col for group in grouped_samples.values() for col in group]
+    Calculates and corrects p-values for specified comparisons across metabolites, 
+    compiling the results into a single DataFrame, ignoring zero values.
 
-    # Apply pd.to_numeric strictly to numeric columns and ensure conversion
+    Parameters:
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the metabolite data with sample values.
+    grouped_samples : dict
+        Dictionary grouping the columns of samples under specific conditions or treatments.
+    comparisons : list of tuples
+        List of tuple pairs indicating the indices of groups in 'grouped_samples' to be compared.
+    correction_method : str
+        The method used for p-value correction (e.g., 'bonferroni', 'fdr_bh').
+
+    Returns:
+    -------
+    pandas.DataFrame
+        A DataFrame with one column per comparison, containing the corrected p-values, and retains specified columns with metabolite information.
+    """
+
+    # time.sleep(2)
+
+    numeric_columns = [col for group in grouped_samples.values() for col in group]
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
-    # Initialize results_df with the metabolite information
-    base_columns = ['Compound', 'C_Label'] if 'C_Label' in df.columns else ['Compound']
-    results_df = df[base_columns].copy()
+    if 'C_Label' in df.columns:
+        summed_df = df[df['C_Label'] != 0].groupby('Compound').sum(min_count=1).reset_index()
+        summed_df.drop(columns=['C_Label'], inplace=True)
+    else:
+        summed_df = df.copy()
+
+    results_df = pd.DataFrame(index=summed_df['Compound'].unique())
+    results_df.index.name = 'Compound'
+    all_p_values = []  # List to store all p-values from all comparisons
+    pvalue_indices = []  # List to store index information for placing p-values back correctly
+
+
+    # export_df = pd.DataFrame(index=summed_df['Compound'].unique())  # Dataframe for export
+    # export_df.index.name = 'Compound'
+
+
 
     keys_list = list(grouped_samples.keys())
 
-    print(comparisons)
-
     for comp_pair in comparisons:
-        # Create a column name directly from the comparison indices
         column_name = str(comp_pair)
         p_values = []
 
-        for index, row in df.iterrows():
+        for compound in results_df.index:
+            group_data = summed_df[summed_df['Compound'] == compound]
+
             group1_columns = grouped_samples[keys_list[comp_pair[0]]]
             group2_columns = grouped_samples[keys_list[comp_pair[1]]]
 
-            # Convert row slices to numeric to ensure proper type for statistical tests
-            data_group1 = pd.to_numeric(row[group1_columns], errors='coerce').dropna()
-            data_group2 = pd.to_numeric(row[group2_columns], errors='coerce').dropna()
+            data_group1 = group_data[group1_columns][group_data[group1_columns] > 0].apply(pd.to_numeric, errors='coerce').dropna()
+            data_group2 = group_data[group2_columns][group_data[group2_columns] > 0].apply(pd.to_numeric, errors='coerce').dropna()
+
+            data_group1 = data_group1.values.flatten()
+            data_group2 = data_group2.values.flatten()
 
             pvalue = perform_two_sided_ttest(data_group1, data_group2)
-
             p_values.append(pvalue)
+            all_p_values.append(pvalue)
+            pvalue_indices.append((column_name, compound))
 
-        # Correct p-values, ignoring NaN
-        valid_pvalues = [p for p in p_values if not np.isnan(p)]
-        if valid_pvalues:  # There are valid p-values to correct
-            corrected_pvalues = apply_pvalue_correction(valid_pvalues, correction_method)
-            # Reinsert corrected p-values into the full list, maintaining positions of NaNs
-            corrected_full = []
-            j = 0
-            for p in p_values:
-                if np.isnan(p):
-                    corrected_full.append(np.nan)
-                else:
-                    corrected_full.append(corrected_pvalues[j])
-                    j += 1
-            results_df[column_name] = corrected_full
-        else:
-            results_df[column_name] = [np.nan] * len(df)  # If no valid p-values, assign all NaN
+        results_df[column_name] = p_values  # Store uncorrected p-values temporarily
+
+
+        # Store uncorrected and will update later with corrected values
+        # export_df[f"uncorrected_{column_name}"] = p_values
+
+        
+    # Apply correction to all collected p-values
+    valid_indices = [i for i, p in enumerate(all_p_values) if not np.isnan(p)]
+    valid_pvalues = [all_p_values[i] for i in valid_indices]
+    corrected_pvalues = apply_pvalue_correction(valid_pvalues, correction_method) if valid_pvalues else []
+
+    # Place corrected p-values back into the DataFrame
+    correction_map = dict(zip(valid_indices, corrected_pvalues))
+    for index, (col, cmpd) in enumerate(pvalue_indices):
+        corrected_pvalue = correction_map.get(index, np.nan)
+        results_df.at[cmpd, col] = corrected_pvalue  # Set NaN if no correction was applied
+
+
+        # export_df[f"corrected_{col}"] = np.nan  # Initialize column in export_df
+        # export_df.at[cmpd, f"corrected_{col}"] = corrected_pvalue  # Update export_df
+
+    # Export the DataFrame with both uncorrected and corrected p-values to a CSV file
+    # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    # export_filename = f"pvalues_comparison_{timestamp}.csv"
+    # export_df.to_csv(export_filename)
+    # time.sleep(2)
 
     return results_df
 
 
 def apply_pvalue_correction(pvalues, correction_method):
     """
-    Apply multiple testing p-value correction methods.
-    
+    Applies a correction method to a list of p-values based on specified multiple testing correction method.
+    Preserves the position of np.nan values.
+
     Parameters:
-    - pvalues (list): A list of p-values to correct.
-    - method (str): The correction method; 'bonferroni', 'fdr_bh' etc.
-    
+    ----------
+    pvalues : list
+        A list of p-values to be corrected, which may contain np.nan values.
+    correction_method : str
+        The correction method to be applied; options include 'bonferroni', 'fdr_bh', etc.
+
     Returns:
-    - array: Corrected p-values.
+    -------
+    array
+        An array of corrected p-values with np.nan values in their original positions.
     """
-    corrected_pvalues = multipletests(pvalues, alpha=0.05, method=correction_method)[1]
-    return corrected_pvalues
+
+    # Identify the indices of valid p-values (non-NaN)
+    valid_indices = [i for i, p in enumerate(pvalues) if not np.isnan(p)]
+    valid_pvalues = [pvalues[i] for i in valid_indices]
+
+    # Apply correction only to valid p-values
+    if valid_pvalues:
+        corrected_pvalues = multipletests(valid_pvalues, alpha=0.05, method=correction_method)[1]
+
+        # Re-integrate the corrected p-values into the original list, preserving NaN positions
+        corrected_full = np.full_like(pvalues, np.nan, dtype=np.float64)  # Initialize array of NaNs with the same shape
+        for idx, corr_pval in zip(valid_indices, corrected_pvalues):
+            corrected_full[idx] = corr_pval
+    else:
+        corrected_full = np.full_like(pvalues, np.nan, dtype=np.float64)  # All values are NaN
+
+    return corrected_full
 
 
 def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
@@ -1621,7 +1716,7 @@ def generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, setti
     return fig
 
 
-def add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, array_columns, numerical_present, settings, color='black'):
+def add_p_value_annotations_iso_distribution(fig, df_iso_met, met_name, grouped_samples, array_columns, numerical_present, corrected_pvalues, settings, color='black'):
     """
     Add p-value annotations to an isotopologue distribution figure.
 
@@ -1687,7 +1782,7 @@ def add_p_value_annotations_iso_distribution(fig, df_iso_met, grouped_samples, a
             # Convert data to numeric and calculate p-value annotation
             y0_data = pd.to_numeric(y0_data, errors='coerce')
             y1_data = pd.to_numeric(y1_data, errors='coerce')
-            symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, numerical_present)
+            symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present)
 
             # Add p-value shapes and annotations
             # Calculate the x-coordinates based on the label's position in the plot
@@ -1873,19 +1968,18 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
 
 
 def perform_two_sided_ttest(group_1, group_2):
+    # Convert to numpy arrays to ignore any index-related issues
+    group_1 = np.array(group_1)
+    group_2 = np.array(group_2)
 
-    if len(group_1) > 1 and len(group_2) > 1:
-        if np.var(group_1) != np.var(group_2):
-
-            pvalue = stats.ttest_ind(group_1, 
-                                    group_2, 
-                                    equal_var=True, 
-                                    nan_policy='omit',
-                                    alternative='two-sided')[1]
-            
-        else:
-            pvalue = np.nan
+    # Perform t-test if conditions are met
+    if len(group_1) > 1 and len(group_2) > 1 and np.var(group_1) > 0 and np.var(group_2) > 0:
+        pvalue = stats.ttest_ind(group_1, 
+                                 group_2, 
+                                 equal_var=False, 
+                                 nan_policy='omit', 
+                                 alternative='two-sided')[1]
+        
+        return pvalue
     else:
-        pvalue = np.nan
-
-    return pvalue
+        return np.nan

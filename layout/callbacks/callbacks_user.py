@@ -762,11 +762,12 @@ def manage_pvalue_dropdown_isotopologue_distribution(add_clicks, clear_clicks, s
     State({'type': 'dynamic-dropdown-p-value-isotopologue-distribution', 'index': ALL}, 'value'),
     State({'type': 'dynamic-dropdown2-p-value-isotopologue-distribution', 'index': ALL}, 'value'),
     State('numerical-p-value-checkbox-isotopologue-distribution', 'value'),
+    State('isotopologue-distribution-pvalue-correction-selection', 'value'),
     State('store-data-order', 'data')
 ],
     prevent_initial_call=True
 )
-def store_p_value_isotopologue_distribution(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, stored_group_order):
+def store_p_value_isotopologue_distribution(n_clicks, dropdown_values, dropdown2_values, numerical_pvalue, pvalue_correction, stored_group_order):
     '''
     Store the selected p-value comparisons and numerical p-value checkbox state for isotopologue distribution data.
 
@@ -817,7 +818,9 @@ def store_p_value_isotopologue_distribution(n_clicks, dropdown_values, dropdown2
         numerical_pvalue_bool = bool(numerical_pvalue)
         
         # Store and return the unique group combinations and checkbox state
-        return {"combinations": combined_values, "numerical_bool": numerical_pvalue_bool}
+        return {"combinations": combined_values, 
+                "numerical_bool": numerical_pvalue_bool,
+                "pvalue_correction": pvalue_correction}
 
     # If no update action is performed or no group order data is stored, return None
     else:
