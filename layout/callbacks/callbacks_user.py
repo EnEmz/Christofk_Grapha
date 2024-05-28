@@ -1615,7 +1615,9 @@ def manage_metabolite_ratios_dropdown(add_clicks, clear_clicks, restore_clicks, 
         # If no data is uploaded, do not update children, but reset the cleared flag if restoring
         if button_id == 'restore-metabolite-ratios' and restore_clicks:
             return children, {'cleared': False}
-        return children, no_update
+        placeholder_message = html.Div("Please upload a metabolomics data file to make ratios available.",
+                                       className='modal-placeholder-message')
+        return [placeholder_message], no_update
 
     pool_json_file = io.StringIO(pool_data)
     df_pool = pd.read_json(pool_json_file, orient='split')

@@ -50,6 +50,7 @@ update_app() {
     echo "Updating Python dependencies..."
     source "$project_path/venv/bin/activate"
     pip install --upgrade pip  # Upgrading pip to the latest version
+    pip install --upgrade setuptools
     pip install -r "$project_path/requirements.txt"
     deactivate
 

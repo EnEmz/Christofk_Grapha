@@ -56,6 +56,7 @@ del "%zip_file_name%"
 echo Updating Python dependencies...
 call "%project_path%\venv\Scripts\activate.bat"
 pip install --upgrade pip
+pip install --upgrade setuptools
 pip install -r "%project_path%\requirements.txt"
 call "%project_path%\venv\Scripts\deactivate.bat"
 

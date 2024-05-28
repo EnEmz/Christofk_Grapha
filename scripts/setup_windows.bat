@@ -18,6 +18,8 @@ call %
  %project_path%\venv\Scripts\activate.bat
 
 echo Installing dependencies from requirements.txt...
+pip install --upgrade pip
+pip install --upgrade setuptools
 pip install -r %project_path%\requirements.txt
 
 echo Deativating the virtual environment...

@@ -32,15 +32,6 @@ def get_main_layout():
         
         dbc.Row([
             dbc.Col(
-                create_button("Configure Metabolite Ratios",
-                              "open-metabolite-ratios",
-                              color='secondary'),
-                className='just-a-button'
-            )
-        ]),
-        
-        dbc.Row([
-            dbc.Col(
                 create_button("Select Metabolite Classes to be Displayed",
                               "open-classes"),
                 className='just-a-button'
@@ -66,8 +57,27 @@ def get_main_layout():
         ],
         justify='center',
         align='center',
-        className='no-print')
+        className='no-print'),
+        
+        
+        dbc.Row([
+            dbc.Col(
+                create_button("Configure Metabolite Ratios",
+                              "open-metabolite-ratios",
+                              color='secondary'),
+                className='just-a-button'
+            ),
+            
+            dbc.Col(
+                create_button("Download Data",
+                              "open-download-data",
+                              color='secondary'),
+                className='just-a-button'
+            )
+        ]),
     ])
+    
+    
 
 
 # Header with styling
