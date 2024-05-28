@@ -171,7 +171,7 @@ def update_metabolomics_figure_layout(fig, array_columns, settings):
     return adjusted_interline, adjusted_text_offset
 
 
-def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present):
+def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present, label=None):
     '''
     Calculates the p-value of the two sets of observations and determines the appropriate
     annotation symbol to display on the plot. Handles edge cases such as zero variance or insufficient data.
@@ -199,14 +199,6 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met
     if isinstance(y1_data, pd.Series):
         y1_data = y1_data.values
 
-    # Check if all datapoints between the groups are the same
-    if np.all(y0_data == y1_data):
-        return "identical"
-
-    # Check for data variance in the same group
-    if np.var(y0_data) == 0 or np.var(y1_data) == 0:
-        return "zero var"
-
     # Filter out zero values
     filtered_y0_data = y0_data[y0_data != 0]
     filtered_y1_data = y1_data[y1_data != 0]
@@ -215,10 +207,60 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met
     if len(filtered_y0_data) < 2 or len(filtered_y1_data) < 2:
         return "ins data"
     
+    # Check for data variance in the same group
+    if np.var(y0_data) == 0 or np.var(y1_data) == 0:
+        return "zero var"
+    
+    # Check if all datapoints between the groups are the same
+    if np.all(y0_data == y1_data):
+        return "identical"
+    
     # Perform t-test
     pvalue = perform_two_sided_ttest(filtered_y0_data, filtered_y1_data)
     
-    # Determine the symbol to display based on p-value
+    uncorrected_symbol = get_significance_symbol(pvalue, numerical_present, label='p')
+
+    # Fetch corrected p-value and generate symbol
+    if corrected_pvalues is not None and not corrected_pvalues.empty:
+        # Ensure you are fetching the value using both 'met_name' and 'label' as indices
+        if label is not None:
+            try:
+                corrected_pvalue = corrected_pvalues.at[(met_name, label), str(column_pair)]
+                corrected_symbol = get_significance_symbol(corrected_pvalue, numerical_present, label='q')
+                return f"{uncorrected_symbol} | {corrected_symbol}"
+            except KeyError:
+                return uncorrected_symbol  # Return uncorrected symbol if no corrected p-value exists
+        else:
+            corrected_pvalue = corrected_pvalues.at[met_name, str(column_pair)]
+            corrected_symbol = get_significance_symbol(corrected_pvalue, numerical_present, label='q')
+            return f"{uncorrected_symbol} | {corrected_symbol}"
+    else:
+        return uncorrected_symbol  # Handling cases where the corrected p-values DataFrame does not exist or is empty
+
+
+def get_significance_symbol(pvalue, numerical_present, label=None):
+    '''
+    Determines the appropriate annotation symbol based on the provided p-value.
+
+    Parameters:
+    ----------
+    pvalue : float
+        The p-value to evaluate for significance.
+    numerical_present : bool
+        If True, returns a string with the actual p-value rounded to four decimal places
+        or "< 0.0001" if the p-value is smaller than 0.0001.
+    label : str, optional
+        Label to prefix the p-value with (e.g., 'p' for uncorrected or 'q' for corrected p-values).
+
+    Returns:
+    -------
+    str
+        A string representing the significance level based on the p-value, or the p-value itself if numerical_present is True.
+    '''
+    if pvalue is None or np.isnan(pvalue):
+        return 'nd'  # Not determined or data not available
+
+    # Determine the symbol or numeric representation based on the p-value
     if pvalue < 0.001:
         symbol = '***'
     elif pvalue < 0.01:
@@ -227,33 +269,13 @@ def calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met
         symbol = '*'
     else:
         symbol = 'ns'
-    
-    # If numerical output is requested and the p-value is above a certain threshold, show the exact p-value
-    if numerical_present and pvalue >= 0.0001:
-        symbol = f"p = {pvalue:.4f}"
-    elif numerical_present:
-        symbol = "p < 0.0001"
-    
-    # If p value correction was selected, append the existing symbol with corrected p value
-    if corrected_pvalues is not None and not corrected_pvalues.empty:
-        corrected_pvalue = corrected_pvalues.at[met_name, str(column_pair)]
 
-        # Determine the symbol to display based on corrected p-value
-        if corrected_pvalue < 0.001:
-            corr_symbol = '***'
-        elif corrected_pvalue < 0.01:
-            corr_symbol = '**'
-        elif corrected_pvalue < 0.05:
-            corr_symbol = '*'
+    # If numerical representation is requested and the p-value is above a certain threshold
+    if numerical_present:
+        if pvalue >= 0.0001:
+            symbol = f"{label} = {pvalue:.4f}" if label else f"p = {pvalue:.4f}"
         else:
-            corr_symbol = 'ns'
-
-        if numerical_present and corrected_pvalue >= 0.0001:
-            corr_symbol = f"q = {corrected_pvalue:.4f}"
-        elif numerical_present:
-            corr_symbol = "q < 0.0001"
-
-        symbol = symbol + ' | ' + corr_symbol
+            symbol = f"{label} < 0.0001" if label else "p < 0.0001"
 
     return symbol
 
@@ -545,7 +567,7 @@ def add_p_value_annotations_iso(fig, df_metabolite, met_name, grouped_samples, a
     return fig
 
 
-def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_method):
+def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_method, graph=None):
     """
     Calculates and corrects p-values for specified comparisons across metabolites, 
     compiling the results into a single DataFrame, ignoring zero values.
@@ -569,17 +591,30 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
 
     # time.sleep(2)
 
+    # Convert numberic columns in the dataframe to numeric type
     numeric_columns = [col for group in grouped_samples.values() for col in group]
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
-    if 'C_Label' in df.columns:
+    # if 'pathway_class' in df.columns:
+    #     df.drop(columns=['pathway_class'], inplace=True)
+    if 'C_Label' not in df.columns:
+        if df['Compound'].duplicated().any():
+            df.drop_duplicates(subset='Compound', keep='first', inplace=True)
+
+    if graph == 'iso':
         summed_df = df[df['C_Label'] != 0].groupby('Compound').sum(min_count=1).reset_index()
         summed_df.drop(columns=['C_Label'], inplace=True)
-    else:
-        summed_df = df.copy()
+        results_df = pd.DataFrame(index=summed_df['Compound'].unique())
 
-    results_df = pd.DataFrame(index=summed_df['Compound'].unique())
-    results_df.index.name = 'Compound'
+    elif graph == 'isodistribution':
+        summed_df = df.set_index(['Compound', 'C_Label'])
+        results_df = pd.DataFrame(index=summed_df.index.unique())
+
+    else:
+        # Assuming graph == 'pool' or any other unspecified graph type
+        summed_df = df.set_index(['Compound'])
+        results_df = pd.DataFrame(index=summed_df.index.unique())  # Use unique compounds as index
+
     all_p_values = []  # List to store all p-values from all comparisons
     pvalue_indices = []  # List to store index information for placing p-values back correctly
 
@@ -595,8 +630,8 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
         column_name = str(comp_pair)
         p_values = []
 
-        for compound in results_df.index:
-            group_data = summed_df[summed_df['Compound'] == compound]
+        for idx, group_data in summed_df.iterrows():
+            compound_key = idx  # compound_key is set directly from the index
 
             group1_columns = grouped_samples[keys_list[comp_pair[0]]]
             group2_columns = grouped_samples[keys_list[comp_pair[1]]]
@@ -610,7 +645,7 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
             pvalue = perform_two_sided_ttest(data_group1, data_group2)
             p_values.append(pvalue)
             all_p_values.append(pvalue)
-            pvalue_indices.append((column_name, compound))
+            pvalue_indices.append((compound_key, column_name))
 
         results_df[column_name] = p_values  # Store uncorrected p-values temporarily
 
@@ -619,17 +654,16 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
         # export_df[f"uncorrected_{column_name}"] = p_values
 
         
-    # Apply correction to all collected p-values
-    valid_indices = [i for i, p in enumerate(all_p_values) if not np.isnan(p)]
-    valid_pvalues = [all_p_values[i] for i in valid_indices]
+    # Correction of p-values
+    valid_pvalues = [p for p in all_p_values if not np.isnan(p) and p <= 1]
     corrected_pvalues = apply_pvalue_correction(valid_pvalues, correction_method) if valid_pvalues else []
 
-    # Place corrected p-values back into the DataFrame
-    correction_map = dict(zip(valid_indices, corrected_pvalues))
-    for index, (col, cmpd) in enumerate(pvalue_indices):
-        corrected_pvalue = correction_map.get(index, np.nan)
-        results_df.at[cmpd, col] = corrected_pvalue  # Set NaN if no correction was applied
+    correction_map = dict(zip([pvalue_indices[i] for i in range(len(all_p_values)) if all_p_values[i] in valid_pvalues], corrected_pvalues))
+    for index, (compound_key, col) in enumerate(pvalue_indices):
+        corrected_pvalue = correction_map.get((compound_key, col), np.nan)
+        results_df.loc[compound_key, col] = corrected_pvalue
 
+    return results_df
 
         # export_df[f"corrected_{col}"] = np.nan  # Initialize column in export_df
         # export_df.at[cmpd, f"corrected_{col}"] = corrected_pvalue  # Update export_df
@@ -639,8 +673,6 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
     # export_filename = f"pvalues_comparison_{timestamp}.csv"
     # export_df.to_csv(export_filename)
     # time.sleep(2)
-
-    return results_df
 
 
 def apply_pvalue_correction(pvalues, correction_method):
@@ -1782,7 +1814,7 @@ def add_p_value_annotations_iso_distribution(fig, df_iso_met, met_name, grouped_
             # Convert data to numeric and calculate p-value annotation
             y0_data = pd.to_numeric(y0_data, errors='coerce')
             y1_data = pd.to_numeric(y1_data, errors='coerce')
-            symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present)
+            symbol = calculate_metabolomics_pvalue_and_display(y0_data, y1_data, column_pair, met_name, corrected_pvalues, numerical_present, label)
 
             # Add p-value shapes and annotations
             # Calculate the x-coordinates based on the label's position in the plot

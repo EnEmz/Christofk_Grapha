@@ -144,28 +144,24 @@ def display_met_data(n_clicks,
             df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
         
 
+        # Initialize corrected p-values to None
+        corrected_pvalues_pool = None
+        corrected_pvalues_iso = None
+
         # Read pvalue information submitted by the user
         if pvalue_info is not None:
             pvalue_comparisons = pvalue_info['combinations']
             pvalue_numerical = pvalue_info['numerical_bool']
             pvalue_correction = pvalue_info['pvalue_correction']
 
-            # Generate corrected pvalue dataframe if it correction method was selected
+            # Generate corrected pvalue dataframe if a correction method was selected and not 'none'
             if pvalue_correction != 'none':
-                corrected_pvalues_pool = generate_corrected_pvalues(df_pool_normalized_grouped, grouped_samples, pvalue_comparisons, pvalue_correction)
-                if iso_present is True:
-                    corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction)
-                else:
-                    corrected_pvalues_iso = None
-            else:
-                corrected_pvalues_pool = None
+                corrected_pvalues_pool = generate_corrected_pvalues(df_pool_normalized_grouped, grouped_samples, pvalue_comparisons, pvalue_correction, 'pool')
+                corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction, 'iso') if iso_present else None
 
 
         df_pool_normalized_groupby = df_pool_normalized_grouped.groupby('pathway_class', sort=False)
-               
         figures_mets = []
-
-
 
         # Iterate over each group of pathway_class
         for pathway, group_df in df_pool_normalized_groupby:
