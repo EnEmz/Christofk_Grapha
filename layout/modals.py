@@ -11,6 +11,8 @@ def build_modal_components():
     modal_components = []
     
     modal_components.append(get_metabolite_ratio_modal())
+    modal_components.append(get_downloaded_data_modal())
+
     
     modal_components.append(get_data_order_modal())
     modal_components.append(get_metabolite_class_modal())
@@ -29,6 +31,35 @@ def build_modal_components():
     modal_components.append(get_settings_modal_lingress())
     
     return modal_components
+
+
+# Function to create the download data modal
+def get_downloaded_data_modal():
+    return dbc.Modal(
+        children=
+        [
+            dbc.ModalHeader("Configure what metabolomics data is to be downloaded."),
+            dbc.ModalBody([
+                dbc.Row([
+                    dbc.Col(html.Div("This is where the download data is going to go."))
+                ],
+                justify='center',
+                align='center'),
+            ]),
+            
+            dbc.ModalFooter([
+                dbc.Row([
+                    dbc.Col(
+                        create_button("Download", "download-data-button", color='success'),
+                        style={"text-align": "center"}
+                    )
+                ])
+            ])
+        ],
+        id="modal-download-data",
+        size="xl",
+        is_open=False
+    )
 
 
 # Function to create metabolite ratio modal

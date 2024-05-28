@@ -15,6 +15,7 @@ def map_button_to_modal():
     return {
         
         'modal-metabolite-ratios': ['open-metabolite-ratios', 'update-metabolite-ratios'],
+        'modal-download-data': ['open-download-data', 'download-data-button'],
         
         'modal-classes': ['open-classes', 'update-classes'],
         'modal-normalization': ['open-normalization', 'update-normalization'],
