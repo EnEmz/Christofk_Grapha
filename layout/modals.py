@@ -41,10 +41,22 @@ def get_downloaded_data_modal():
             dbc.ModalHeader("Configure what metabolomics data is to be downloaded."),
             dbc.ModalBody([
                 dbc.Row([
-                    dbc.Col(html.Div("This is where the download data is going to go."))
+                    dbc.Col(html.Div(id='download-container-data-type', children=[]))
                 ],
                 justify='center',
                 align='center'),
+                
+                # dbc.Row([
+                #     dbc.Col(html.Div(id='download-container-normalization', children=[]))
+                # ],
+                # justify='center',
+                # align='center'),
+                
+                # dbc.Row([
+                #     dbc.Col(html.Div(id='download-container-pvalues', children=[]))
+                # ],
+                # justify='center',
+                # align='center'),
             ]),
             
             dbc.ModalFooter([

@@ -46,6 +46,7 @@ def build_storage_components():
     storage_components.append(get_storage('store-isotopologue-distribution-selection'))
     
     # For user actions
+    storage_components.append(get_storage('store-download-data-selection'))
     storage_components.append(get_storage('store-user-metabolite-ratio-cleared', 'memory', {'cleared': False}))
     
     return storage_components
