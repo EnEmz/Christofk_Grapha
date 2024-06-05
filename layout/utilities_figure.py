@@ -589,40 +589,32 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
         A DataFrame with one column per comparison, containing the corrected p-values, and retains specified columns with metabolite information.
     """
 
-    # time.sleep(2)
-
-    # Convert numberic columns in the dataframe to numeric type
+    # Convert numeric columns in the dataframe to numeric type
     numeric_columns = [col for group in grouped_samples.values() for col in group]
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
-    # if 'pathway_class' in df.columns:
-    #     df.drop(columns=['pathway_class'], inplace=True)
+    # Handle potential duplicates
     if 'C_Label' not in df.columns:
         if df['Compound'].duplicated().any():
             df.drop_duplicates(subset='Compound', keep='first', inplace=True)
 
+    # Summarize and prepare results DataFrame based on graph type
     if graph == 'iso':
-        summed_df = df[df['C_Label'] != 0].groupby('Compound').sum(min_count=1).reset_index()
-        summed_df.drop(columns=['C_Label'], inplace=True)
-        results_df = pd.DataFrame(index=summed_df['Compound'].unique())
+        summed_temp_df = df[df['C_Label'] != 0].groupby(['Compound', 'C_Label']).sum(min_count=1).reset_index()
+        summed_df = summed_temp_df.groupby('Compound').sum().reset_index()
+        summed_df.set_index('Compound', inplace=True)
+        results_df = pd.DataFrame(index=summed_df.index)
 
     elif graph == 'isodistribution':
         summed_df = df.set_index(['Compound', 'C_Label'])
         results_df = pd.DataFrame(index=summed_df.index.unique())
 
     else:
-        # Assuming graph == 'pool' or any other unspecified graph type
-        summed_df = df.set_index(['Compound'])
-        results_df = pd.DataFrame(index=summed_df.index.unique())  # Use unique compounds as index
+        summed_df = df.set_index('Compound')
+        results_df = pd.DataFrame(index=summed_df.index.unique())
 
     all_p_values = []  # List to store all p-values from all comparisons
     pvalue_indices = []  # List to store index information for placing p-values back correctly
-
-
-    # export_df = pd.DataFrame(index=summed_df['Compound'].unique())  # Dataframe for export
-    # export_df.index.name = 'Compound'
-
-
 
     keys_list = list(grouped_samples.keys())
 
@@ -632,30 +624,31 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
 
         for idx, group_data in summed_df.iterrows():
             compound_key = idx  # compound_key is set directly from the index
-
             group1_columns = grouped_samples[keys_list[comp_pair[0]]]
             group2_columns = grouped_samples[keys_list[comp_pair[1]]]
 
-            data_group1 = group_data[group1_columns][group_data[group1_columns] > 0].apply(pd.to_numeric, errors='coerce').dropna()
-            data_group2 = group_data[group2_columns][group_data[group2_columns] > 0].apply(pd.to_numeric, errors='coerce').dropna()
+            try:
+                data_group1 = pd.to_numeric(group_data[group1_columns].replace(0, np.nan).dropna(), errors='coerce')
+                data_group2 = pd.to_numeric(group_data[group2_columns].replace(0, np.nan).dropna(), errors='coerce')
 
-            data_group1 = data_group1.values.flatten()
-            data_group2 = data_group2.values.flatten()
+            except KeyError as e:
+                print(f"KeyError: {e}")
+                continue
 
-            pvalue = perform_two_sided_ttest(data_group1, data_group2)
+            if data_group1.empty or data_group2.empty:
+                pvalue = np.nan
+            else:
+                pvalue = perform_two_sided_ttest(data_group1, data_group2)
+
             p_values.append(pvalue)
             all_p_values.append(pvalue)
             pvalue_indices.append((compound_key, column_name))
 
         results_df[column_name] = p_values  # Store uncorrected p-values temporarily
 
-
-        # Store uncorrected and will update later with corrected values
-        # export_df[f"uncorrected_{column_name}"] = p_values
-
-        
     # Correction of p-values
     valid_pvalues = [p for p in all_p_values if not np.isnan(p) and p <= 1]
+
     corrected_pvalues = apply_pvalue_correction(valid_pvalues, correction_method) if valid_pvalues else []
 
     correction_map = dict(zip([pvalue_indices[i] for i in range(len(all_p_values)) if all_p_values[i] in valid_pvalues], corrected_pvalues))
@@ -665,14 +658,23 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
 
     return results_df
 
-        # export_df[f"corrected_{col}"] = np.nan  # Initialize column in export_df
-        # export_df.at[cmpd, f"corrected_{col}"] = corrected_pvalue  # Update export_df
 
-    # Export the DataFrame with both uncorrected and corrected p-values to a CSV file
-    # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    # export_filename = f"pvalues_comparison_{timestamp}.csv"
-    # export_df.to_csv(export_filename)
-    # time.sleep(2)
+def perform_two_sided_ttest(group_1, group_2):
+    # Convert to numpy arrays to ignore any index-related issues
+    group_1 = np.array(group_1)
+    group_2 = np.array(group_2)
+
+    # Perform t-test if conditions are met
+    if len(group_1) > 1 and len(group_2) > 1 and np.var(group_1) > 0 and np.var(group_2) > 0:
+        pvalue = stats.ttest_ind(group_1, 
+                                 group_2, 
+                                 equal_var=False, 
+                                 nan_policy='omit', 
+                                 alternative='two-sided')[1]
+        
+        return pvalue
+    else:
+        return np.nan
 
 
 def apply_pvalue_correction(pvalues, correction_method):
@@ -1998,20 +2000,3 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
 
     return fig, stats
 
-
-def perform_two_sided_ttest(group_1, group_2):
-    # Convert to numpy arrays to ignore any index-related issues
-    group_1 = np.array(group_1)
-    group_2 = np.array(group_2)
-
-    # Perform t-test if conditions are met
-    if len(group_1) > 1 and len(group_2) > 1 and np.var(group_1) > 0 and np.var(group_2) > 0:
-        pvalue = stats.ttest_ind(group_1, 
-                                 group_2, 
-                                 equal_var=False, 
-                                 nan_policy='omit', 
-                                 alternative='two-sided')[1]
-        
-        return pvalue
-    else:
-        return np.nan
