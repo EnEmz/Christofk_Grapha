@@ -40,24 +40,51 @@ def get_downloaded_data_modal():
         [
             dbc.ModalHeader("Configure what metabolomics data is to be downloaded."),
             dbc.ModalBody([
-                dbc.Row([html.Label('Select data types for download:')], justify='center', align='center'),
+                
+                dbc.Row([
+                    html.Label('Select data types for download')], 
+                    className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-data-type', children=[]))
                 ],
                 justify='center',
                 align='center'),
-                
+
+                dbc.Row([
+                    html.Label('Select all which metabolite classes to be downloaded')], 
+                    className='modal-info-text'),
+                dbc.Row([
+                    dbc.Col(html.Div(id='download-container-classes', children=[]))
+                ],
+                justify='center',
+                align='center'),
+
+                dbc.Row([
+                    html.Label('Select normalization for pool data (can select none if no normalization needed)')], 
+                    className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-normalization', children=[]))
                 ],
                 justify='center',
                 align='center'),
-                
-                # dbc.Row([
-                #     dbc.Col(html.Div(id='download-container-pvalues', children=[]))
-                # ],
-                # justify='center',
-                # align='center'),
+
+                dbc.Row([
+                    html.Label('Select p value comparisons between your entered sample groups')], 
+                    className='modal-info-text'),
+
+                dbc.Row([
+                    dbc.Col(
+                        create_button('Generate Comparison', 'generate-download-p-value-comparison-button', color='info')),
+                    dbc.Col(
+                        create_button('Clear All Comparisons', 'clear-download-p-value-comparisons-button', color='danger'))
+                ], 
+                justify='center', 
+                align='center'),
+
+                dbc.Row([html.Label('P-Value Comparisons:')], className='modal-info-text'),
+                dbc.Row([
+                    dbc.Col(html.Div(id='download-p-value-container', children=[]))
+                ], justify='center', align='center'),
             ]),
             
             dbc.ModalFooter([

@@ -276,6 +276,15 @@ margin: 5px;
     display: inline-block;
 }
 
+.modal-info-text {
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding-top: 40px;
+    padding-bottom: 5px;
+}
+
 .modal-placeholder-message {
     text-align: center;
     padding: 20px;
