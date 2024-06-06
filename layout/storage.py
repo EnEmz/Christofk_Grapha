@@ -47,6 +47,7 @@ def build_storage_components():
     
     # For user actions
     storage_components.append(get_storage('store-download-data-selection'))
+    storage_components.append(get_storage('store-download-config'))
     storage_components.append(get_storage('store-user-metabolite-ratio-cleared', 'memory', {'cleared': False}))
     
     return storage_components

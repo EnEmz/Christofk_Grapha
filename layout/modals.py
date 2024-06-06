@@ -36,57 +36,65 @@ def build_modal_components():
 # Function to create the download data modal
 def get_downloaded_data_modal():
     return dbc.Modal(
-        children=
-        [
+        children=[
             dbc.ModalHeader("Configure what metabolomics data is to be downloaded."),
             dbc.ModalBody([
-                
+
                 dbc.Row([
-                    html.Label('Select data types for download')], 
-                    className='modal-info-text'),
+                    html.Label('Select data types for download')
+                ], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-data-type', children=[]))
-                ],
-                justify='center',
-                align='center'),
+                ], justify='center', align='center'),
 
                 dbc.Row([
-                    html.Label('Select all which metabolite classes to be downloaded')], 
-                    className='modal-info-text'),
+                    html.Label('Select all which metabolite classes to be downloaded')
+                ], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-classes', children=[]))
-                ],
-                justify='center',
-                align='center'),
+                ], justify='center', align='center'),
 
                 dbc.Row([
-                    html.Label('Select normalization for pool data (can select none if no normalization needed)')], 
-                    className='modal-info-text'),
+                    html.Label('Select normalization for pool data (can select none if no normalization needed)')
+                ], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-normalization', children=[]))
-                ],
-                justify='center',
-                align='center'),
+                ], justify='center', align='center'),
 
                 dbc.Row([
-                    html.Label('Select p value comparisons between your entered sample groups')], 
-                    className='modal-info-text'),
+                    html.Label('Select p value comparisons between your entered sample groups')
+                ], className='modal-info-text'),
 
                 dbc.Row([
                     dbc.Col(
-                        create_button('Generate Comparison', 'generate-download-p-value-comparison-button', color='info')),
+                        create_button('Generate Comparison', 'generate-download-p-value-comparison-button', color='info')
+                    ),
                     dbc.Col(
-                        create_button('Clear All Comparisons', 'clear-download-p-value-comparisons-button', color='danger'))
-                ], 
-                justify='center', 
-                align='center'),
+                        create_button('Clear All Comparisons', 'clear-download-p-value-comparisons-button', color='danger')
+                    )
+                ], justify='center', align='center'),
 
                 dbc.Row([html.Label('P-Value Comparisons:')], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-p-value-container', children=[]))
                 ], justify='center', align='center'),
+
+                dbc.Row([
+                    html.Label('Select p value correction method')
+                ], className='modal-info-text'),
+
+                dbc.Row([
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id='download-pvalue-correction-selection',
+                            options=p_value_correction_options,
+                            value='none'
+                        ),
+                        width=5
+                    ),
+                ]),
             ]),
-            
+
             dbc.ModalFooter([
                 dbc.Row([
                     dbc.Col(

@@ -26,19 +26,19 @@ def generate_download_container_data_type(n_clicks, pool_data, iso_data, lin_dat
     checkboxes = []
 
     if pool_data is not None:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-pool'}, label='Pool Data', value=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-pool'}, label='Pool Data', value=True)))
     else:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-pool'}, label='Pool Data', value=False, disabled=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-pool'}, label='Pool Data', value=False, disabled=True)))
 
     if iso_data is not None:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-iso'}, label='Isotopologue Data', value=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-iso'}, label='Isotopologue Data', value=True)))
     else:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-iso'}, label='Isotopologue Data', value=False, disabled=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-iso'}, label='Isotopologue Data', value=False, disabled=True)))
 
     if lin_data is not None:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-lingress'}, label='Lingress Data', value=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-lingress'}, label='Lingress Data', value=True)))
     else:
-        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'checkbox', 'index': 'download-lingress'}, label='Lingress Data', value=False, disabled=True)))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id={'type': 'download-type-checkbox', 'index': 'download-lingress'}, label='Lingress Data', value=False, disabled=True)))
 
     return dbc.Row(checkboxes, justify='center')
 
@@ -211,4 +211,76 @@ def manage_download_p_value_comparisons(n_clicks_open, n_clicks_generate, n_clic
 
     return no_update
 
+
+@app.callback(
+    Output('store-download-config', 'data'),
+    Input('download-data-button', 'n_clicks'),
+    State({'type': 'download-type-checkbox', 'index': ALL}, 'value'),
+    State({'type': 'download-type-checkbox', 'index': ALL}, 'id'),
+    State('normalization-dropdown-selector-download', 'value'),
+    State('metabolite-class-dropdown', 'value'),
+    State({'type': 'dynamic-dropdown-p-value-download', 'index': ALL}, 'value'),
+    State({'type': 'dynamic-dropdown2-p-value-download', 'index': ALL}, 'value'),
+    State('download-pvalue-correction-selection', 'value'),
+    State('store-data-order', 'data'),
+    prevent_initial_call=True
+)
+def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalization_values, metabolite_class, p_value_comp_1, p_value_comp_2, pvalue_correction, stored_group_order):
+    if n_clicks is None:
+        raise PreventUpdate
+
+    # Collecting the data types selected
+    selected_data_types = {
+        checkbox_id['index']: value 
+        for checkbox_id, value in zip(checkbox_ids, checkbox_values)
+    }
+    print("Selected Data Types:", selected_data_types)
+
+    # Collecting normalization values
+    normalization_selected = normalization_values if normalization_values else []
+    print("Selected Normalization:", normalization_selected)
+
+    # Collecting metabolite class
+    print("Selected Metabolite Class:", metabolite_class)
+
+    # Collecting p-value comparisons
+    if stored_group_order:
+        group_order = list(stored_group_order.keys())
+        
+        # Extract and store unique combinations of selected groups for comparisons
+        seen_combinations = set()
+        combined_values = []
+        for group1, group2 in zip(p_value_comp_1, p_value_comp_2):
+            if group1 is None or group2 is None:
+                continue
+            # Sort indices to avoid duplicated mirror combinations
+            combination = sorted([group_order.index(group1), group_order.index(group2)])
+            combination_tuple = tuple(combination)
+            
+            if combination_tuple not in seen_combinations:
+                seen_combinations.add(combination_tuple)
+                combined_values.append(combination)
+        
+        p_value_comparisons = {
+            "combinations": combined_values,
+            "pvalue_correction": pvalue_correction
+        }
+    else:
+        p_value_comparisons = {
+            "combinations": [],
+            "pvalue_correction": None
+        }
+
+    print("P-Value Comparisons:", p_value_comparisons)
+
+    download_config = {
+        'data_types': selected_data_types,
+        'normalization': normalization_selected,
+        'metabolite_class': metabolite_class,
+        'p_value_comparisons': p_value_comparisons
+    }
+
+    print("Download Config:", download_config)
+
+    return download_config
 
