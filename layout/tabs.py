@@ -215,6 +215,17 @@ def get_tab_isotopologue_distribution():
         children=[
             dbc.Row([
                 dbc.Col(
+                     create_button("Generate All Isotopologue Distribution Plot",
+                                            "generate-isotopologue-distribution-all",
+                                            color="secondary"),
+                    className='just-a-button'
+                ),
+            ],
+            justify='center',
+            align='center'),
+
+            dbc.Row([
+                dbc.Col(
                     create_dropdown_with_label("Select a Metabolite for Isotopologue Distribution Plot",
                                                          "isotopologue-distribution-dropdown",
                                                          placeholder="Select a metabolite name"),
@@ -231,7 +242,7 @@ def get_tab_isotopologue_distribution():
                     className='just-a-button'
                 ),
                 dbc.Col(
-                    create_button("Generate Metabolomics Plots",
+                    create_button("Generate Individual Isotopologue Distribution Plot",
                                             "generate-isotopologue-distribution",
                                             color="success"),
                     className='just-a-button'

@@ -2000,3 +2000,42 @@ def generate_single_lingress_plot(df_met_data, df_var_data, settings):
 
     return fig, stats
 
+
+def filter_and_order_isotopologue_data_by_met_class(df_iso, met_classes, df_class=df_met_group_list):
+    """
+    Filter and order df_iso based on met_classes using the df_class for mapping.
+
+    Parameters:
+    ----------
+    df_iso : pandas.DataFrame
+        The isotopologue data DataFrame.
+    met_classes : list
+        List of user-selected metabolite classes.
+    df_class : pandas.DataFrame
+        DataFrame containing pathway class and analyte name mapping.
+
+    Returns:
+    -------
+    pandas.DataFrame
+        The filtered and ordered DataFrame.
+    pandas.DataFrame
+        DataFrame containing compounds and their pathway classes.
+    """
+    
+    # Filter the df_class to include only the selected classes
+    filtered_df_class = df_class[df_class['pathway_class'].isin(met_classes)]
+    
+    # Merge the df_iso with the filtered df_class to filter and retain order
+    merged_df = pd.merge(filtered_df_class, df_iso, left_on='analyte_name', right_on='Compound', how='inner')
+    
+    # Sort the merged DataFrame based on the order of met_classes
+    merged_df['class_order'] = merged_df['pathway_class'].apply(lambda x: met_classes.index(x))
+    sorted_df = merged_df.sort_values(by=['class_order', 'analyte_name']).drop(columns=['class_order'])
+    
+    # Select only the columns present in df_iso for the final output
+    final_df = sorted_df[df_iso.columns]
+    
+    # Create a DataFrame with compound metadata
+    compound_metadata_df = merged_df[['Compound', 'pathway_class']].drop_duplicates().reset_index(drop=True)
+    
+    return final_df, compound_metadata_df

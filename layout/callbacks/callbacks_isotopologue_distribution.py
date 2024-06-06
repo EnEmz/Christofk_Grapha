@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 
 from app import app
 from layout.toast import generate_toast
-from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution, generate_corrected_pvalues
+from layout.utilities_figure import generate_isotopologue_distribution_figure, add_p_value_annotations_iso_distribution, generate_corrected_pvalues, filter_and_order_isotopologue_data_by_met_class
 
 
 @app.callback(
@@ -54,33 +54,28 @@ def update_iso_distribution_dropdown_options(iso_data):
     
 @app.callback(
 [
-    Output('isotopologue-distribution-container', 'children'),
+    Output('isotopologue-distribution-container', 'children', allow_duplicate=True),
     Output('toast-container', 'children', allow_duplicate=True)
 ],
-[
     Input('generate-isotopologue-distribution', 'n_clicks'),
-    Input('store-data-iso', 'data'),
-    Input('isotopologue-distribution-dropdown', 'value'),
-],
 [
+    State('store-data-iso', 'data'),
+    State('isotopologue-distribution-dropdown', 'value'),
     State('store-data-order', 'data'),
     State('store-p-value-isotopologue-distribution', 'data'),
     State('store-settings-isotopologue-distribution', 'data'),
     State('store-isotopologue-distribution-selection', 'data')
 ],
-    prevent_initial_call = True
+    prevent_initial_call=True
 )
-def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_groups, pvalue_info, settings, selected_isos):
+def display_single_isotopologue_distribution_plot(n_clicks_single, iso_data, met_name, met_groups, pvalue_info, settings, selected_isos):
     '''
-    Display an isotopologue distribution plot based on user-selected parameters and provided data.
-    This function is triggered by the 'generate-isotopologue-distribution' button and creates a bar chart 
-    showing the distributions of isotopologues for a selected metabolite, including average and standard deviation 
-    across different sample groups.
+    Display an isotopologue distribution plot for a single selected compound.
 
     Parameters:
     ----------
-    n_clicks : int
-        Number of times the button has been clicked.
+    n_clicks_single : int
+        Number of times the single compound button has been clicked.
     iso_data : json
         JSON-formatted string containing the isotopologue data DataFrame.
     met_name : str
@@ -101,52 +96,38 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
     '''
     
     ctx = callback_context  # Get callback context to identify which input has triggered the callback
-    
-    fig = Figure()  # Create a new plotly figure
-    
-    if not ctx.triggered:
-        triggered_id = 'No clicks yet'
-    else:
-        triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
-    if triggered_id == 'generate-isotopologue-distribution' and n_clicks > 0:
 
-        if iso_data is None:
-            return no_update, generate_toast("error", 
-                                             "Error", 
-                                             "No uploaded isopotologue (labelling) data detected.")
-        
-        if met_name is None:
-            return no_update, generate_toast("error", 
-                                             "Error", 
-                                             "No selected metabolite for isotopologue distribution plot.")
-        
-        # Check if the user has entered any sample groups  and if not return an error toast
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    if n_clicks_single > 0:
+        # Validate inputs and display toasts if necessary
+        if not iso_data:
+            return no_update, generate_toast("error", "Error", "No uploaded isotopologue (labelling) data detected.")
+
         if not met_groups:
-            return no_update, generate_toast("error", 
-                                             "Error", 
-                                             "Not selected sample groups for grouping replicates. Refer to 'Group Sample Replicates for Data Analysis.'")
-        
-        # Read the isotopologue data from the JSON string
-        iso_json_file = io.StringIO(iso_data)
-        df_iso = pd.read_json(iso_json_file, orient='split')
-        
-        # Filter the data for the selected metabolite
+            return no_update, generate_toast("error", "Error", "No selected sample groups for grouping replicates. Refer to 'Group Sample Replicates for Data Analysis.'")
+
+        if met_name is None:
+            return no_update, generate_toast("error", "Error", "No selected metabolite for isotopologue distribution plot.")
+
+        try:
+            # Read the isotopologue data from the JSON string
+            iso_json_file = io.StringIO(iso_data)
+            df_iso = pd.read_json(iso_json_file, orient='split')
+        except ValueError as e:
+            return no_update, generate_toast("error", "Error", "Failed to read isotopologue data.")
+
         df_iso_met = df_iso[df_iso['Compound'] == met_name].fillna(0).reset_index(drop=True)
-        
-        # Convert the selected isotopologue numbers back into integers
+
         if selected_isos:
             selected_isos = [int(iso) for iso in selected_isos]
         else:
-            # If no isotopologues are selected (e.g., on first run), select all available
             selected_isos = df_iso_met['C_Label'].dropna().unique().tolist()
-        
-        # Filter the DataFrame for only the selected isotopologues
+
         df_iso_met = df_iso_met[df_iso_met['C_Label'].isin(selected_isos)]
-        
-        # Process and group the sample data based on the input groups
         grouped_samples = {group: samples for group, samples in met_groups.items() if group and samples}
-        
+
         fig = generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, settings)
 
         corrected_pvalues_iso = None
@@ -158,34 +139,164 @@ def display_isotopologue_distribution_plot(n_clicks, iso_data, met_name, met_gro
 
             if pvalue_correction != 'none':
                 corrected_pvalues_iso = generate_corrected_pvalues(df_iso, grouped_samples, pvalue_comparisons, pvalue_correction, 'isodistribution')
-                
 
-
-            fig = add_p_value_annotations_iso_distribution(fig, 
-                                                           df_iso_met, 
+            fig = add_p_value_annotations_iso_distribution(fig,
+                                                           df_iso_met,
                                                            met_name,
-                                                           grouped_samples, 
-                                                           pvalue_comparisons, 
-                                                           pvalue_numerical, 
+                                                           grouped_samples,
+                                                           pvalue_comparisons,
+                                                           pvalue_numerical,
                                                            corrected_pvalues_iso,
                                                            settings)
 
         filename = 'iso_distribution_' + str(met_name)
+
+        return [html.Div([
+            html.H5(met_name, className='met-name-style'),
+            dcc.Graph(
+                id='isotopologue-distribution-plot',
+                figure=fig,
+                config={
+                    'toImageButtonOptions': {
+                        'format': 'svg',
+                        'filename': filename,
+                        'height': None,
+                        'width': None,
+                    }
+                }
+            )
+        ])], no_update
+
+    raise PreventUpdate
+
+
+@app.callback(
+[
+    Output('isotopologue-distribution-container', 'children'),
+    Output('toast-container', 'children', allow_duplicate=True)
+],
+    Input('generate-isotopologue-distribution-all', 'n_clicks'),
+[
+    State('store-data-iso', 'data'),
+    State('store-data-order', 'data'),
+    State('store-met-classes', 'data'),
+    State('store-p-value-isotopologue-distribution', 'data'),
+    State('store-settings-isotopologue-distribution', 'data'),
+    State('store-isotopologue-distribution-selection', 'data')
+],
+prevent_initial_call=True
+)
+def display_all_isotopologue_distribution_plots(n_clicks_all, iso_data, met_groups, met_classes, pvalue_info, settings, selected_isos):
+    '''
+    Display isotopologue distribution plots for all compounds.
+
+    Parameters:
+    ----------
+    n_clicks_all : int
+        Number of times the all compounds button has been clicked.
+    iso_data : json
+        JSON-formatted string containing the isotopologue data DataFrame.
+    met_groups : dict
+        Dictionary containing the grouping of samples for analysis.
+    met_classes : list
+        User-selected metabolite classes.
+    pvalue_info : dict
+        Information about p-values for statistical significance.
+    settings : dict
+        Selected or placeholder settings for the isotopologue distribution plot.
+    selected_isos: list
+        Select isotopologues to be displayed in the isotopologue distribution plot.
+
+    Returns:
+    -------
+    list
+        A list containing dcc.Graph objects for the isotopologue distribution plot.
+    '''
+    
+    ctx = callback_context  # Get callback context to identify which input has triggered the callback
+
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    if n_clicks_all > 0:
+
+        # Validate inputs and display toasts if necessary
+        if not iso_data:
+            return no_update, generate_toast("error", "Error", "No uploaded isotopologue (labelling) data detected.")
+
+        if not met_groups:
+            return no_update, generate_toast("error", "Error", "No selected sample groups for grouping replicates. Refer to 'Group Sample Replicates for Data Analysis.'")
+
+        try:
+            # Read the isotopologue data from the JSON string
+            iso_json_file = io.StringIO(iso_data)
+            df_iso = pd.read_json(iso_json_file, orient='split')
+        except ValueError as e:
+            return no_update, generate_toast("error", "Error", "Failed to read isotopologue data.")
         
-        # Returning the plotly figure as a Dash Graph component within a list
-        return [dcc.Graph(
-                    id='isotopologue-distribution-plot', 
-                    figure=fig, 
+        # Filter and order the df_iso based on met_classes
+        filtered_ordered_df, compound_metadata_df = filter_and_order_isotopologue_data_by_met_class(df_iso, met_classes['selected_values'])
+
+        unique_compounds = filtered_ordered_df['Compound'].unique()
+        figures_mets = []
+
+        last_class = None
+
+        for compound in unique_compounds:
+            current_class = compound_metadata_df[compound_metadata_df['Compound'] == compound]['pathway_class'].iloc[0]
+
+            if current_class != last_class:
+                # Add a header for the new metabolite class
+                figures_mets.append(html.H3(current_class, className='met-class-style'))
+                last_class = current_class
+
+            df_iso_met = filtered_ordered_df[filtered_ordered_df['Compound'] == compound].fillna(0).reset_index(drop=True)
+
+            if selected_isos:
+                selected_isos = [int(iso) for iso in selected_isos]
+            else:
+                selected_isos = df_iso_met['C_Label'].dropna().unique().tolist()
+
+            df_iso_met = df_iso_met[df_iso_met['C_Label'].isin(selected_isos)]
+            grouped_samples = {group: samples for group, samples in met_groups.items() if group and samples}
+
+            figure_met_iso = generate_isotopologue_distribution_figure(df_iso_met, grouped_samples, settings)
+            iso_filename = 'iso_' + str(compound)
+
+            corrected_pvalues_iso = None
+
+            if pvalue_info is not None:
+                pvalue_comparisons = pvalue_info['combinations']
+                pvalue_numerical = pvalue_info['numerical_bool']
+                pvalue_correction = pvalue_info['pvalue_correction']
+
+                if pvalue_correction != 'none':
+                    corrected_pvalues_iso = generate_corrected_pvalues(filtered_ordered_df, grouped_samples, pvalue_comparisons, pvalue_correction, 'isodistribution')
+
+                figure_met_iso = add_p_value_annotations_iso_distribution(figure_met_iso,
+                                                                          df_iso_met,
+                                                                          compound,
+                                                                          grouped_samples,
+                                                                          pvalue_comparisons,
+                                                                          pvalue_numerical,
+                                                                          corrected_pvalues_iso,
+                                                                          settings)
+
+            figures_mets.append(html.Div([
+                html.H4(compound, className='met-name-style'),
+                dcc.Graph(
+                    figure=figure_met_iso,
                     config={
                         'toImageButtonOptions': {
                             'format': 'svg',
-                            'filename': filename,
+                            'filename': iso_filename,
                             'height': None,
                             'width': None,
                         }
-                    }
-                )], no_update
-            
-    else:
-        # Prevent the callback from updating the output if conditions are not met
-        raise PreventUpdate
+                    },
+                )
+            ], style={'padding-bottom': '10%'}))
+
+        return html.Div(figures_mets), no_update
+
+    raise PreventUpdate

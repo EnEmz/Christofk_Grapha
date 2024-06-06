@@ -25,19 +25,19 @@ def generate_download_container_data_type(n_clicks, pool_data, iso_data, lin_dat
     checkboxes = []
 
     if pool_data is not None:
-        checkboxes.append(dbc.Checkbox(id='checkbox-pool', label='Pool Data', value=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-pool', label='Pool Data', value=True)))
     else:
-        checkboxes.append(dbc.Checkbox(id='checkbox-pool', label='Pool Data', value=False, disabled=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-pool', label='Pool Data', value=False, disabled=True)))
 
     if iso_data is not None:
-        checkboxes.append(dbc.Checkbox(id='checkbox-iso', label='Normalization Data', value=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-iso', label='Isotopologue Data', value=True)))
     else:
-        checkboxes.append(dbc.Checkbox(id='checkbox-iso', label='Normalization Data', value=False, disabled=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-iso', label='Isotopologue Data', value=False, disabled=True)))
 
     if lin_data is not None:
-        checkboxes.append(dbc.Checkbox(id='checkbox-lingress', label='Lingress Data', value=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-lingress', label='Lingress Data', value=True)))
     else:
-        checkboxes.append(dbc.Checkbox(id='checkbox-lingress', label='Lingress Data', value=False, disabled=True))
+        checkboxes.append(dbc.Col(dbc.Checkbox(id='checkbox-lingress', label='Lingress Data', value=False, disabled=True)))
 
-    return dbc.Form(checkboxes)
-    
+    # Ensure checkboxes are in a single row
+    return dbc.Row(checkboxes, justify='center')
