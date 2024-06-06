@@ -20,6 +20,6 @@ def create_layout():
             
             get_main_layout(),
             
-            get_tabs_parent()
+            get_tabs_parent(),
         ]
     )

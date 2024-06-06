@@ -86,6 +86,7 @@ iso_color_palette = [
     "#B22222",  # Firebrick
 ]
 
+# statsmodels.stats.multitest.multipletests
 p_value_correction_options = [
     {"label": "None", "value": "none"},
     {"label": "Bonferroni", "value": "bonferroni"},

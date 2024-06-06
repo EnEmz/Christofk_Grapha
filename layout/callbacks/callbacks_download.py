@@ -6,7 +6,10 @@ from dash.exceptions import PreventUpdate
 from dash import html, dcc, no_update, callback_context
 
 from app import app
-from layout.config import normalization_preselected
+from layout.config import normalization_preselected, df_met_group_list
+from layout.toast import generate_toast
+from layout.utilities_download import get_download_df_pool, get_download_df_iso, get_download_df_lingress, get_download_df_pool_pvalues, get_download_df_iso_pvalues
+from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, compile_met_pool_ratio_data
 
 # Generate checkboxes for pool, normalization and lingress data
 @app.callback(
@@ -271,8 +274,6 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
             "pvalue_correction": None
         }
 
-    print("P-Value Comparisons:", p_value_comparisons)
-
     download_config = {
         'data_types': selected_data_types,
         'normalization': normalization_selected,
@@ -283,4 +284,86 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
     print("Download Config:", download_config)
 
     return download_config
+
+
+@app.callback(
+    Output('toast-container', 'children', allow_duplicate=True),
+    Input('store-download-config', 'data'),
+    State('store-data-pool', 'data'),
+    State('store-data-iso', 'data'),
+    State('store-data-lingress', 'data'),
+    State('store-metabolite-ratios', 'data'),
+    State('store-met-classes', 'data'),
+    prevent_initial_call=True
+)
+def download_sheet_w_options(download_config,
+                             pool_data,
+                             iso_data,
+                             lingress_data,
+                             met_ratios,
+                             met_classes_selected):
+    
+    if download_config is None:
+        raise PreventUpdate
+    
+    # Read user selected config for download from stored values into variables
+    selected_data_types = download_config.get('data_types', {})
+    normalization_selected = download_config.get('normalization', {})
+
+    # Create a list of metabolite classes based on user selection
+    class_user_selection = download_config.get('metabolite_class', {})
+
+    if class_user_selection == 'selected':
+        met_classes = met_classes_selected['selected_values']
+
+    else:
+        met_classes = df_met_group_list['pathway_class'].drop_duplicates().tolist()
+
+    
+    p_value_comparisons = download_config.get('p_value_comparisons', {})
+    p_value_comparison_combinations = p_value_comparisons['combinations']
+    p_value_comparison_corr = p_value_comparisons['pvalue_correction']
+
+    # Check if pool data is selected and available
+    if 'download-pool' in selected_data_types and selected_data_types['download-pool']:
+        if pool_data is None:
+            return generate_toast("error", 
+                                  "Error", 
+                                  "No uploaded pool data.")
+        pool_json_file = io.StringIO(pool_data)
+        df_pool = pd.read_json(pool_json_file, orient='split')
+
+        # Proceed with generating the pool data dataframe
+        df_download_pool = get_download_df_pool(df_pool, met_classes, normalization_selected)
+
+    # Check if iso data is selected and available
+    if 'download-iso' in selected_data_types and selected_data_types['download-iso']:
+        if iso_data is None:
+            return generate_toast("error", 
+                                  "Error", 
+                                  "No uploaded iso data.")
+        iso_json_file = io.StringIO(iso_data)
+        df_iso = pd.read_json(iso_json_file, orient='split')
+        
+        # Proceed with generating the iso data dataframe
+        df_download_iso = get_download_df_iso(df_iso, met_classes)
+
+
+    # Check if lingress data is selected and available
+    if 'download-lingress' in selected_data_types and selected_data_types['download-lingress']:
+        if lingress_data is None:
+            return generate_toast("error", 
+                                  "Error", 
+                                  "No uploaded lingress data.")
+        lingress_json_file = io.StringIO(lingress_data)
+        df_lingress = pd.read_json(lingress_json_file, orient='split')
+
+        # Proceed with generating the lingress data dataframe
+        df_download_lingress = get_download_df_lingress(df_lingress)
+
+
+
+
+
+
 
