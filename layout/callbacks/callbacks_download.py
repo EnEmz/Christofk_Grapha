@@ -8,7 +8,7 @@ from dash import html, dcc, no_update, callback_context
 from app import app
 from layout.config import normalization_preselected, df_met_group_list
 from layout.toast import generate_toast
-from layout.utilities_download import get_download_df_pool, get_download_df_iso, get_download_df_lingress, get_download_df_pool_pvalues, get_download_df_iso_pvalues
+from layout.utilities_download import get_download_df_normalized_pool, get_download_df_iso, get_download_df_lingress, get_download_df_pool_pvalues, get_download_df_iso_pvalues
 from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, compile_met_pool_ratio_data
 
 # Generate checkboxes for pool, normalization and lingress data
@@ -116,6 +116,28 @@ def generate_download_container_classes(n_clicks):
 
 
 @app.callback(
+    Output('download-container-groups', 'children'),
+    Input('open-download-data', 'n_clicks')
+)
+def generate_download_container_groups(n_clicks):
+    if n_clicks == 0:
+        raise PreventUpdate
+
+    dropdown = dcc.Dropdown(
+        id='metabolite-groups-dropdown',
+        options=[
+            {'label': 'All sample replicates', 'value': 'all'},
+            {'label': 'Already stored sample replicate selection', 'value': 'selected'}
+        ],
+        value='all',
+        multi=False,
+        style={'width': '600px', 'margin': '0 auto'}  # Set the desired width and center alignment
+    )
+
+    return [html.Div([dropdown], style={'width': '100%', 'text-align': 'center'})]
+
+
+@app.callback(
     Output('download-p-value-container', 'children'),
     Input('open-download-data', 'n_clicks'),
     Input('generate-download-p-value-comparison-button', 'n_clicks'),
@@ -157,49 +179,57 @@ def manage_download_p_value_comparisons(n_clicks_open, n_clicks_generate, n_clic
 
     if button_id == 'open-download-data':
         if stored_group_order is None:
-            placeholder_message = html.Div("Please group sample replicates to make p-value comparisons available.",
+            placeholder_message = html.Div("Please group sample replicates to make p-value comparisons available at 'Group Sample Replicates for Data Analysis'.",
                                            className='modal-placeholder-message')
             return [placeholder_message]
         else:
             return []
 
     if button_id == 'clear-download-p-value-comparisons-button' and n_clicks_clear:
-        # If the clear button was clicked, remove all dropdowns
-        return []
+        if stored_group_order is None:
+            placeholder_message = html.Div("Please group sample replicates to make p-value comparisons available at 'Group Sample Replicates for Data Analysis'.",
+                                           className='modal-placeholder-message')
+            return [placeholder_message]
+        else:
+            # If the clear button was clicked, remove all dropdowns
+            return []
 
     elif button_id == 'generate-download-p-value-comparison-button' and n_clicks_generate:
-        # Creating dropdown options from the stored group order data
-        sample_groups_dropdown = [{'label': group, 'value': group} for group in stored_group_order.keys()] if stored_group_order else []
-        
-        # Adding a new dropdown row for each button click
-        new_element_id = len(current_comparisons)
-        new_dropdown_row = html.Div([
-            dbc.Row([
-                dbc.Col(html.Div(html.Label(f'Comparison #{new_element_id + 1}:'), style={'textAlign': 'center'}), width=2),
-                dbc.Col(html.Div(dcc.Dropdown(
-                    id={
-                        'type': 'dynamic-dropdown-p-value-download',
-                        'index': new_element_id
-                    },
-                    options=sample_groups_dropdown,
-                ), style={'padding': '5px', 'margin': '5px'})),
-                dbc.Col(html.Div(html.Label('to'), style={'textAlign': 'center'}), width=1),
-                dbc.Col(html.Div(dcc.Dropdown(
-                    id={
-                        'type': 'dynamic-dropdown2-p-value-download',
-                        'index': new_element_id
-                    },
-                    options=sample_groups_dropdown,
-                ), style={'padding': '5px', 'margin': '5px'})),
-                dbc.Col(dbc.Button("Delete", id={'type': 'delete-download-p-value-comparison', 'index': new_element_id}, color='danger', className='mr-1'))
-            ],
-            justify='center',
-            align='center'
-            ),
-        ], style={'margin-bottom': '10px'}, id={'type': 'comparison-row', 'index': new_element_id})
+        if stored_group_order is None:
+            raise PreventUpdate
+        else:
+            # Creating dropdown options from the stored group order data
+            sample_groups_dropdown = [{'label': group, 'value': group} for group in stored_group_order.keys()] if stored_group_order else []
+            
+            # Adding a new dropdown row for each button click
+            new_element_id = len(current_comparisons)
+            new_dropdown_row = html.Div([
+                dbc.Row([
+                    dbc.Col(html.Div(html.Label(f'Comparison #{new_element_id + 1}:'), style={'textAlign': 'center'}), width=2),
+                    dbc.Col(html.Div(dcc.Dropdown(
+                        id={
+                            'type': 'dynamic-dropdown-p-value-download',
+                            'index': new_element_id
+                        },
+                        options=sample_groups_dropdown,
+                    ), style={'padding': '5px', 'margin': '5px'})),
+                    dbc.Col(html.Div(html.Label('to'), style={'textAlign': 'center'}), width=1),
+                    dbc.Col(html.Div(dcc.Dropdown(
+                        id={
+                            'type': 'dynamic-dropdown2-p-value-download',
+                            'index': new_element_id
+                        },
+                        options=sample_groups_dropdown,
+                    ), style={'padding': '5px', 'margin': '5px'})),
+                    dbc.Col(dbc.Button("Delete", id={'type': 'delete-download-p-value-comparison', 'index': new_element_id}, color='danger', className='mr-1'))
+                ],
+                justify='center',
+                align='center'
+                ),
+            ], style={'margin-bottom': '10px'}, id={'type': 'comparison-row', 'index': new_element_id})
 
-        current_comparisons.append(new_dropdown_row)
-        return current_comparisons
+            current_comparisons.append(new_dropdown_row)
+            return current_comparisons
 
     elif 'delete-download-p-value-comparison' in button_id:
         # Correctly extract the index of the delete button that was clicked
@@ -222,13 +252,14 @@ def manage_download_p_value_comparisons(n_clicks_open, n_clicks_generate, n_clic
     State({'type': 'download-type-checkbox', 'index': ALL}, 'id'),
     State('normalization-dropdown-selector-download', 'value'),
     State('metabolite-class-dropdown', 'value'),
+    State('metabolite-groups-dropdown', 'value'),
     State({'type': 'dynamic-dropdown-p-value-download', 'index': ALL}, 'value'),
     State({'type': 'dynamic-dropdown2-p-value-download', 'index': ALL}, 'value'),
     State('download-pvalue-correction-selection', 'value'),
     State('store-data-order', 'data'),
     prevent_initial_call=True
 )
-def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalization_values, metabolite_class, p_value_comp_1, p_value_comp_2, pvalue_correction, stored_group_order):
+def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalization_values, met_class_user, met_groups_user, p_value_comp_1, p_value_comp_2, pvalue_correction, stored_group_order):
     if n_clicks is None:
         raise PreventUpdate
 
@@ -237,14 +268,9 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
         checkbox_id['index']: value 
         for checkbox_id, value in zip(checkbox_ids, checkbox_values)
     }
-    print("Selected Data Types:", selected_data_types)
 
     # Collecting normalization values
     normalization_selected = normalization_values if normalization_values else []
-    print("Selected Normalization:", normalization_selected)
-
-    # Collecting metabolite class
-    print("Selected Metabolite Class:", metabolite_class)
 
     # Collecting p-value comparisons
     if stored_group_order:
@@ -277,11 +303,10 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
     download_config = {
         'data_types': selected_data_types,
         'normalization': normalization_selected,
-        'metabolite_class': metabolite_class,
+        'metabolite_class': met_class_user,
+        'metabolite_groups': met_groups_user,
         'p_value_comparisons': p_value_comparisons
     }
-
-    print("Download Config:", download_config)
 
     return download_config
 
@@ -294,6 +319,7 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
     State('store-data-lingress', 'data'),
     State('store-metabolite-ratios', 'data'),
     State('store-met-classes', 'data'),
+    State('store-data-order', 'data'),
     prevent_initial_call=True
 )
 def download_sheet_w_options(download_config,
@@ -301,28 +327,42 @@ def download_sheet_w_options(download_config,
                              iso_data,
                              lingress_data,
                              met_ratios,
-                             met_classes_selected):
+                             met_classes_selected,
+                             met_groups_selected):
     
     if download_config is None:
         raise PreventUpdate
     
     # Read user selected config for download from stored values into variables
     selected_data_types = download_config.get('data_types', {})
-    normalization_selected = download_config.get('normalization', {})
+
+    normalization_list = download_config.get('normalization', {})
 
     # Create a list of metabolite classes based on user selection
     class_user_selection = download_config.get('metabolite_class', {})
-
     if class_user_selection == 'selected':
-        met_classes = met_classes_selected['selected_values']
+        if met_classes_selected is None:
+            return generate_toast("error", 
+                                  "Error", 
+                                  "No selected classes detected.")
+        else:
+            met_classes = met_classes_selected['selected_values']
 
     else:
         met_classes = df_met_group_list['pathway_class'].drop_duplicates().tolist()
 
-    
-    p_value_comparisons = download_config.get('p_value_comparisons', {})
-    p_value_comparison_combinations = p_value_comparisons['combinations']
-    p_value_comparison_corr = p_value_comparisons['pvalue_correction']
+    # Create a dict of sample replicate groups based on user selection
+    groups_user_selection = download_config.get('metabolite_groups', {})
+    if groups_user_selection == 'selected':
+        if met_groups_selected is None:
+            return generate_toast("error", 
+                                  "Error", 
+                                  "No selected sample replicate groups detected.")
+        else:
+            grouped_samples = {group: samples for group, samples in met_groups_selected.items() if group and samples}
+    else:
+        grouped_samples = 'all'
+
 
     # Check if pool data is selected and available
     if 'download-pool' in selected_data_types and selected_data_types['download-pool']:
@@ -331,10 +371,10 @@ def download_sheet_w_options(download_config,
                                   "Error", 
                                   "No uploaded pool data.")
         pool_json_file = io.StringIO(pool_data)
-        df_pool = pd.read_json(pool_json_file, orient='split')
+        df_download_pool = pd.read_json(pool_json_file, orient='split')
 
         # Proceed with generating the pool data dataframe
-        df_download_pool = get_download_df_pool(df_pool, met_classes, normalization_selected)
+        df_download_normalized_pool = get_download_df_normalized_pool(df_download_pool, met_classes, normalization_list, grouped_samples, met_ratios)
 
     # Check if iso data is selected and available
     if 'download-iso' in selected_data_types and selected_data_types['download-iso']:
@@ -356,14 +396,108 @@ def download_sheet_w_options(download_config,
                                   "Error", 
                                   "No uploaded lingress data.")
         lingress_json_file = io.StringIO(lingress_data)
-        df_lingress = pd.read_json(lingress_json_file, orient='split')
+        df_download_lingress = pd.read_json(lingress_json_file, orient='split')
 
-        # Proceed with generating the lingress data dataframe
-        df_download_lingress = get_download_df_lingress(df_lingress)
+        # Get each possible variable for the lingress (can do more than one)
+        for _, row in df_download_lingress.iterrows():
+            df_var_data = pd.DataFrame(row).T
+
+            # Proceed with generating the lingress data dataframe
+            df_download_lingress_stats = get_download_df_lingress(df_var_data, df_download_pool, met_classes, normalization_list, grouped_samples, met_ratios)
+
+            print(df_download_lingress_stats)
+
+    p_value_comparisons = download_config.get('p_value_comparisons', {})
+    p_value_comparison_combinations = p_value_comparisons['combinations']
+    p_value_comparison_corr = p_value_comparisons['pvalue_correction']
 
 
 
 
 
 
+
+
+
+
+
+
+# @app.callback(
+#     Output('toast-container', 'children', allow_duplicate=True),
+#     Output('download-link', 'href'),
+#     Input('store-download-config', 'data'),
+#     State('store-data-pool', 'data'),
+#     State('store-data-iso', 'data'),
+#     State('store-data-lingress', 'data'),
+#     State('store-metabolite-ratios', 'data'),
+#     State('store-met-classes', 'data'),
+#     prevent_initial_call=True
+# )
+# def download_sheet_w_options(download_config,
+#                              pool_data,
+#                              iso_data,
+#                              lingress_data,
+#                              met_ratios,
+#                              met_classes_selected):
+    
+#     if download_config is None:
+#         raise PreventUpdate
+    
+#     # Read user selected config for download from stored values into variables
+#     selected_data_types = download_config.get('data_types', {})
+#     normalization_selected = download_config.get('normalization', {})
+
+#     # Create a list of metabolite classes based on user selection
+#     class_user_selection = download_config.get('metabolite_class', {})
+
+#     if class_user_selection == 'selected':
+#         met_classes = met_classes_selected['selected_values']
+#     else:
+#         met_classes = df_met_group_list['pathway_class'].drop_duplicates().tolist()
+
+#     p_value_comparisons = download_config.get('p_value_comparisons', {})
+#     p_value_comparison_combinations = p_value_comparisons['combinations']
+#     p_value_comparison_corr = p_value_comparisons['pvalue_correction']
+
+#     # Initialize an Excel writer
+#     output = io.BytesIO()
+#     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+#         # Check if pool data is selected and available
+#         if 'download-pool' in selected_data_types and selected_data_types['download-pool']:
+#             if pool_data is None:
+#                 return generate_toast("error", "Error", "No uploaded pool data."), ""
+#             pool_json_file = io.StringIO(pool_data)
+#             df_pool = pd.read_json(pool_json_file, orient='split')
+#             # Generate the pool data dataframe
+#             df_download_pool = get_download_df_pool(df_pool, met_classes, normalization_selected)
+#             df_download_pool.to_excel(writer, sheet_name='Pool Data')
+
+#         # Check if iso data is selected and available
+#         if 'download-iso' in selected_data_types and selected_data_types['download-iso']:
+#             if iso_data is None:
+#                 return generate_toast("error", "Error", "No uploaded iso data."), ""
+#             iso_json_file = io.StringIO(iso_data)
+#             df_iso = pd.read_json(iso_json_file, orient='split')
+#             # Generate the iso data dataframe
+#             df_download_iso = get_download_df_iso(df_iso, met_classes)
+#             df_download_iso.to_excel(writer, sheet_name='ISO Data')
+
+#         # Check if lingress data is selected and available
+#         if 'download-lingress' in selected_data_types and selected_data_types['download-lingress']:
+#             if lingress_data is None:
+#                 return generate_toast("error", "Error", "No uploaded lingress data."), ""
+#             lingress_json_file = io.StringIO(lingress_data)
+#             df_lingress = pd.read_json(lingress_json_file, orient='split')
+#             # Generate the lingress data dataframe
+#             df_download_lingress = get_download_df_lingress(df_lingress)
+#             df_download_lingress.to_excel(writer, sheet_name='Lingress Data')
+
+#     # Save the Excel file to BytesIO buffer
+#     output.seek(0)
+#     excel_data = output.getvalue()
+
+#     # Create a download link
+#     download_link = dcc.send_data_frame(excel_data, 'download.xlsx')
+
+#     return generate_toast("success", "Success", "File ready for download."), download_link
 

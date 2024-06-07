@@ -48,7 +48,7 @@ def get_downloaded_data_modal():
                 ], justify='center', align='center'),
 
                 dbc.Row([
-                    html.Label('Select all which metabolite classes to be downloaded')
+                    html.Label("Select metabolite classes for download (all or from 'Select Metabolite Classes to be Displayed')")
                 ], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-classes', children=[]))
@@ -59,6 +59,13 @@ def get_downloaded_data_modal():
                 ], className='modal-info-text'),
                 dbc.Row([
                     dbc.Col(html.Div(id='download-container-normalization', children=[]))
+                ], justify='center', align='center'),
+
+                dbc.Row([
+                    html.Label("Select sample groups for download (all or from 'Group Sample Replicates for Data Analysis')")
+                ], className='modal-info-text'),
+                dbc.Row([
+                    dbc.Col(html.Div(id='download-container-groups', children=[]))
                 ], justify='center', align='center'),
 
                 dbc.Row([

@@ -722,8 +722,8 @@ def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
     ----------
     df_pool : pandas.DataFrame
         A DataFrame containing metabolite pool data, with the 'Compound' column specifying the metabolite names.
-    grouped_samples : dict
-        Dictionary grouping sample columns.
+    grouped_samples : dict or str
+        Dictionary grouping sample columns, or 'all' to include all sample columns.
     normalization_list : list
         List of metabolites used for the normalization process.
         
@@ -736,8 +736,12 @@ def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
     # Extract the metabolite names column
     pool_met_name_column = df_pool.iloc[:, 0]
     
-    # Flatten grouped_samples to get a list of all relevant sample columns
-    all_samples = [sample for group_samples in grouped_samples.values() for sample in group_samples]
+    # If grouped_samples is 'all', include all sample columns except the first one
+    if grouped_samples == 'all':
+        all_samples = df_pool.columns[1:]
+    else:
+        # Flatten grouped_samples to get a list of all relevant sample columns
+        all_samples = [sample for group_samples in grouped_samples.values() for sample in group_samples]
     
     # Filter the DataFrame to include only the relevant sample columns
     df_pool_filter = df_pool[all_samples]
@@ -759,7 +763,7 @@ def normalize_met_pool_data(df_pool, grouped_samples, normalization_list):
     df_pool_normalized = df_pool_normalized[~df_pool_normalized['Compound'].isin(normalization_list)]
     df_pool_normalized = df_pool_normalized.reset_index(drop=True)
     
-    return df_pool_normalized 
+    return df_pool_normalized
 
 
 def group_met_pool_data(df, selected_met_classes):
