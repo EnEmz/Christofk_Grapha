@@ -446,8 +446,6 @@ def collect_download_options(n_clicks, checkbox_values, checkbox_ids, normalizat
             "pvalue_correction": None
         }
 
-    print(f"P-value comparisons: {p_value_comparisons}")
-
     download_config = {
         'data_types': selected_data_types,
         'normalization': normalization_selected,

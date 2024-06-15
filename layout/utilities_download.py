@@ -85,7 +85,7 @@ def get_download_df_lingress(df_var_data, df_pool, met_classes, normalization_se
     """
     Performs linear regression analysis between metabolite data and an external variable for each compound
     and get it ready for downloading. 
-    
+
     Parameters:
     ----------
     df_var_data : pd.DataFrame
@@ -132,7 +132,6 @@ def get_download_df_lingress(df_var_data, df_pool, met_classes, normalization_se
 
         # Skip if not enough valid data points
         if len(var_values_filtered) < 2 or len(met_values_filtered) < 2:
-            print(f"Skipping compound {compound_name} due to insufficient valid data points")
             results_list.append({
                 'Compound': compound_name,
                 'ND Reason': 'Insufficient valid data points'
@@ -152,7 +151,6 @@ def get_download_df_lingress(df_var_data, df_pool, met_classes, normalization_se
                 'ND Reason': ''
             })
         except Exception as e:
-            print(f"Error performing linregress for compound {compound_name}: {e}")
             results_list.append({
                 'Compound': compound_name,
                 'ND Reason': f'Error during linregress: {e}'
