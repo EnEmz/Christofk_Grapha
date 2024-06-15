@@ -47,11 +47,15 @@ curl -L "%repo_url%/archive/main.zip" -o "%zip_file_name%"
 echo Unzipping the repository...
 mkdir "%temp_extract_path%"
 powershell -Command "Expand-Archive -LiteralPath '%zip_file_name%' -DestinationPath '%temp_extract_path%' -Force"
-xcopy /E /I /Y /EXCLUDE:%project_path%\exclude.txt "%temp_extract_path%\Christofk_Grapha-main\*" "%project_path%\"
-rd /s /q "%temp_extract_path%"
+
+echo Replacing old files with new ones from the repository...
+robocopy "%temp_extract_path%\Christofk_Grapha-main" "%project_path%" /MIR /XD .git venv scripts
 
 echo Removing the ZIP file...
 del "%zip_file_name%"
+
+echo Removing temporary files...
+rd /s /q "%temp_extract_path%"
 
 echo Updating Python dependencies...
 call "%project_path%\venv\Scripts\activate.bat"
