@@ -1,6 +1,6 @@
 # content.py
 
-from dash import html
+from dash import html, dcc
 
 from layout.main import get_main_layout
 from layout.storage import build_storage_components
@@ -13,6 +13,9 @@ def create_layout():
         children=[
             # For displaying error messages for users
             html.Div(id="toast-container"),
+
+            # For downloading data
+            dcc.Download(id="download-link"),
             
             *build_modal_components(),
             

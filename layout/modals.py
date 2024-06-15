@@ -104,11 +104,28 @@ def get_downloaded_data_modal():
 
             dbc.ModalFooter([
                 dbc.Row([
+                    dbc.Col([
+                            dcc.Input(
+                                id='download-data-input',
+                                type='text',
+                                placeholder='Enter filename',
+                                value='default_filename',
+                                style={'display': 'inline-block', 'width': '200px'}
+                            ),
+                            
+                        ],
+                        style={"text-align": "center"}
+                    ),
+
+                    dbc.Col(
+                        html.Span('.xlsx', style={'display': 'inline-block', 'vertical-align': 'middle'})
+                    ),
+                    
                     dbc.Col(
                         create_button("Download", "download-data-button", color='success'),
                         style={"text-align": "center"}
                     )
-                ])
+                ], justify='center', align='center')
             ])
         ],
         id="modal-download-data",
