@@ -659,13 +659,13 @@ def generate_corrected_pvalues(df, grouped_samples, comparisons, correction_meth
     return results_df
 
 
-def perform_two_sided_ttest(group_1, group_2):
+def perform_two_sided_ttest(group_1, group_2, variance_threshold=1e-8):
     # Convert to numpy arrays to ignore any index-related issues
     group_1 = np.array(group_1)
     group_2 = np.array(group_2)
 
     # Perform t-test if conditions are met
-    if len(group_1) > 1 and len(group_2) > 1 and np.var(group_1) > 0 and np.var(group_2) > 0:
+    if len(group_1) > 1 and len(group_2) > 1 and np.var(group_1) > variance_threshold and np.var(group_2) > variance_threshold:
         pvalue = stats.ttest_ind(group_1, 
                                  group_2, 
                                  equal_var=False, 
@@ -675,6 +675,9 @@ def perform_two_sided_ttest(group_1, group_2):
         return pvalue
     else:
         return np.nan
+    
+
+
 
 
 def apply_pvalue_correction(pvalues, correction_method):

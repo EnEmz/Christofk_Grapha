@@ -93,6 +93,8 @@ p_value_correction_options = [
     {"label": "Benjamini-Hochberg", "value": "fdr_bh"}
 ]
 
+def get_pvalue_label_from_value(value):
+    return next((option["label"] for option in p_value_correction_options if option["value"] == value), None)
 
 # Placeholder metabolite ratios list
 metabolite_ratios_default = [

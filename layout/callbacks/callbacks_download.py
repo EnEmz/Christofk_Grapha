@@ -9,8 +9,7 @@ import base64
 from app import app
 from layout.config import normalization_preselected, df_met_group_list
 from layout.toast import generate_toast
-from layout.utilities_download import get_download_df_normalized_pool, get_download_df_iso, get_download_df_lingress
-from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, compile_met_pool_ratio_data
+from layout.utilities_download import get_download_df_normalized_pool, get_download_df_iso, get_download_df_lingress, perform_two_sided_ttest_download, generate_corrected_pvalues_download, sort_pvalue_df_cols
 
 # Generate checkboxes for pool, normalization and lingress data
 @app.callback(
@@ -478,8 +477,11 @@ def download_sheet_w_options(download_config, filename, pool_data, iso_data, lin
     if not filename:
         filename = "default_filename"
 
-    # Read user selected config for download from stored values into variables
+    # Read user selected config for download from stored values into variables and return toast if none selected.
     selected_data_types = download_config.get('data_types', {})
+    if not any(selected_data_types.values()):
+        return generate_toast("error", "Error", "No data types selected for download."), no_update
+    
     normalization_list = download_config.get('normalization', {})
 
     # Create a list of metabolite classes based on user selection
@@ -518,6 +520,7 @@ def download_sheet_w_options(download_config, filename, pool_data, iso_data, lin
             df_download_pool.to_excel(writer, sheet_name='PoolAfterDF', index=False)
             df_download_normalized_pool.to_excel(writer, sheet_name='Normalized Pool', index=False)
 
+            
         # Check if iso data is selected and available
         if 'download-iso' in selected_data_types and selected_data_types['download-iso']:
             if iso_data is None:
@@ -546,6 +549,39 @@ def download_sheet_w_options(download_config, filename, pool_data, iso_data, lin
                 # Proceed with generating the lingress data dataframe
                 df_download_lingress_stats = get_download_df_lingress(df_var_data, df_download_pool, met_classes, normalization_list, grouped_samples, met_ratios)
                 df_download_lingress_stats.to_excel(writer, sheet_name=f'Lingress Data {row["Variable"]}', index=False)
+
+
+        # Check if pvalue comparisons were input by the user
+        pvalue_comparisons = download_config['p_value_comparisons']['combinations']
+        pvalue_correction = download_config['p_value_comparisons']['pvalue_correction']
+
+        # Pvalue excel sheet logic start
+        if pvalue_comparisons != []:
+            
+            if met_groups_selected is None:
+                return generate_toast("error", "Error", "No selected sample replicate groups detected. "), no_update
+            
+            grouped_samples_pvalues = {group: samples for group, samples in met_groups_selected.items() if group and samples}
+
+            # Check if user select pool data type for download
+            if 'download-pool' in selected_data_types and selected_data_types['download-pool']:
+                df_pool_pvalues, all_pvalues, pvalue_index_info = perform_two_sided_ttest_download(df_download_normalized_pool, pvalue_comparisons, grouped_samples_pvalues)
+                
+                if pvalue_correction != 'none':    
+                    df_pool_corrected_pvalues = generate_corrected_pvalues_download(pvalue_correction, all_pvalues, pvalue_index_info)
+                    
+                    df_pool_pvalue_merged = sort_pvalue_df_cols(df_pool_pvalues, df_pool_corrected_pvalues)
+                    print(df_pool_pvalue_merged)
+
+                else:
+                    df_pool_pvalue_merged = df_pool_pvalues
+
+            df_pool_pvalue_merged.to_excel(writer, sheet_name='Pool Pvalues', index=False)
+
+
+            # Check if user select iso data type for download
+            if 'download-iso' in selected_data_types and selected_data_types['download-iso']:
+                pass
 
     # Save the Excel file to BytesIO buffer
     output.seek(0)

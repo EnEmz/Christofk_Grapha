@@ -1,10 +1,14 @@
 # utilities_download.py
 
 import pandas as pd
+import numpy as np
+from scipy import stats
+import warnings
 from scipy.stats import linregress
+from statsmodels.stats.multitest import multipletests
 
 from layout.utilities_figure import normalize_met_pool_data, group_met_pool_data, compile_met_pool_ratio_data, filter_and_order_isotopologue_data_by_met_class
-
+from layout.config import get_pvalue_label_from_value
 
 def get_download_df_normalized_pool(df_pool, met_classes, normalization_selected, grouped_samples, met_ratio_selection):
     """
@@ -47,8 +51,6 @@ def get_download_df_normalized_pool(df_pool, met_classes, normalization_selected
     if 'metabolite ratios' in met_classes and met_ratio_selection is not None:
         df_ratio = compile_met_pool_ratio_data(df_pool_normalized, met_ratio_selection)
         df_pool_normalized_grouped = pd.concat([df_pool_normalized_grouped, df_ratio])
-
-    df_pool_normalized_grouped = df_pool_normalized_grouped.drop(columns=['pathway_class'])
 
     return df_pool_normalized_grouped
 
@@ -160,3 +162,181 @@ def get_download_df_lingress(df_var_data, df_pool, met_classes, normalization_se
     results_df = pd.DataFrame(results_list)
 
     return results_df
+
+
+def perform_two_sided_ttest_download(df, pvalue_comparisons, grouped_samples, variance_threshold=1e-5):
+    df = df.copy()  # Make a copy of the DataFrame to avoid altering the original
+    results = []
+    all_p_values = []  # List to store all p-values from all comparisons
+    pvalue_index_info = []  # List to store index information for placing p-values back correctly
+
+    # Check if 'Compound' column is present
+    if 'Compound' not in df.columns:
+        print("Columns in the DataFrame:", df.columns)
+        raise KeyError("The 'Compound' column is not found in the DataFrame.")
+    
+    
+    for metabolite in df['Compound']:
+        metabolite_results = {'Compound': metabolite}
+        for index, column_pair in enumerate(pvalue_comparisons):
+            group_list = list(grouped_samples.keys())
+            
+            # Access the group names using the indices provided by column_pair
+            group1_key = group_list[column_pair[0]]
+            group2_key = group_list[column_pair[1]]
+            
+            # Now use the keys to get the sample names from the grouped_samples dictionary
+            group1_sample_names = grouped_samples[group1_key]
+            group2_sample_names = grouped_samples[group2_key]
+            
+            # Extract the data for each group for the current metabolite and convert to numeric
+            group1_data = pd.to_numeric(df.loc[df['Compound'] == metabolite, group1_sample_names].values.flatten(), errors='coerce')
+            group2_data = pd.to_numeric(df.loc[df['Compound'] == metabolite, group2_sample_names].values.flatten(), errors='coerce')
+            
+            # Col name for the pvalue column with group names
+            p_col_name = f'p | {group1_key} vs {group2_key}'
+
+            # Handle cases with insufficient data with less than 2 datapoints in either group
+            if len(group1_data) < 2 or len(group2_data) < 2:
+                pvalue = np.nan
+                metabolite_results[p_col_name] = "insufficient data"
+            elif np.std(group1_data) < variance_threshold or np.std(group2_data) < variance_threshold:
+                pvalue = np.nan
+                metabolite_results[p_col_name] = "variance < 1E-08"
+            elif np.all(group1_data == group2_data):
+                pvalue = np.nan
+                metabolite_results[p_col_name] = "identical data"
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=RuntimeWarning)
+                    pvalue = stats.ttest_ind(group1_data, 
+                                             group2_data, 
+                                             equal_var=False, 
+                                             nan_policy='omit', 
+                                             alternative='two-sided')[1]
+                metabolite_results[p_col_name] = pvalue
+
+            all_p_values.append(pvalue)
+            pvalue_index_info.append((metabolite, f'{group1_key} vs {group2_key}'))
+        
+        results.append(metabolite_results)
+    
+    return pd.DataFrame(results), all_p_values, pvalue_index_info
+
+
+def apply_pvalue_correction_download(pvalues, correction_method):
+    """
+    Applies a correction method to a list of p-values based on specified multiple testing correction method.
+    Preserves the position of np.nan values.
+
+    Parameters:
+    ----------
+    pvalues : list
+        A list of p-values to be corrected, which may contain np.nan values.
+    correction_method : str
+        The correction method to be applied; options include 'bonferroni', 'fdr_bh', etc.
+
+    Returns:
+    -------
+    array
+        An array of corrected p-values with np.nan values in their original positions.
+    """
+
+    # Identify the indices of valid p-values (non-NaN)
+    valid_indices = [i for i, p in enumerate(pvalues) if not np.isnan(p)]
+    valid_pvalues = [pvalues[i] for i in valid_indices]
+
+    # Apply correction only to valid p-values
+    if valid_pvalues:
+        corrected_pvalues = multipletests(valid_pvalues, alpha=0.05, method=correction_method)[1]
+
+        # Re-integrate the corrected p-values into the original list, preserving NaN positions
+        corrected_full = np.full_like(pvalues, np.nan, dtype=np.float64)  # Initialize array of NaNs with the same shape
+        for idx, corr_pval in zip(valid_indices, corrected_pvalues):
+            corrected_full[idx] = corr_pval
+    else:
+        corrected_full = np.full_like(pvalues, np.nan, dtype=np.float64)  # All values are NaN
+
+    return corrected_full
+
+
+def generate_corrected_pvalues_download(correction_method, all_p_values, pvalue_index_info):
+    """
+    Corrects p-values for specified comparisons across metabolites,
+    compiling the results into a single DataFrame.
+
+    Parameters:
+    ----------
+    correction_method : str
+        The method used for p-value correction (e.g., 'bonferroni', 'fdr_bh').
+    all_p_values : list
+        List of all p-values calculated from the two-sided t-tests.
+    pvalue_index_info : list
+        List of tuples containing index information for placing p-values back correctly.
+
+    Returns:
+    -------
+    pandas.DataFrame
+        A DataFrame with one column per comparison, containing the corrected p-values.
+    """
+    # Get the p-value correction method label name
+    pvalue_correction_label = get_pvalue_label_from_value(correction_method)
+    
+    # Initialize the corrected results DataFrame
+    unique_compounds = list(set([info[0] for info in pvalue_index_info]))
+    corrected_results_df = pd.DataFrame({'Compound': unique_compounds})
+
+    # Correction of p-values if required
+    if correction_method != 'none':
+        valid_pvalues = [p for p in all_p_values if not np.isnan(p) and p <= 1]
+        corrected_pvalues = apply_pvalue_correction_download(valid_pvalues, correction_method) if valid_pvalues else []
+
+        # Create a DataFrame to hold corrected p-values
+        comparison_columns = list(set([info[1].replace('p | ', '') for info in pvalue_index_info]))
+        for col in comparison_columns:
+            qvalue_col_name = f'q | {col} ({pvalue_correction_label})'
+            corrected_results_df[qvalue_col_name] = np.nan
+
+        correction_map = dict(zip([pvalue_index_info[i] for i in range(len(all_p_values)) if all_p_values[i] in valid_pvalues], corrected_pvalues))
+        for index, (compound_key, col) in enumerate(pvalue_index_info):
+            original_col_name = col.replace('p | ', '')  # Remove 'p | ' from column name
+            qvalue_col_name = f'q | {original_col_name} ({pvalue_correction_label})'
+            corrected_pvalue = correction_map.get((compound_key, col), np.nan)
+            corrected_results_df.loc[corrected_results_df['Compound'] == compound_key, qvalue_col_name] = corrected_pvalue
+
+    return corrected_results_df
+
+
+def sort_pvalue_df_cols(df_pvalues, df_qvalues):
+    # Ensure both DataFrames are sorted by the same key
+    df_pvalues = df_pvalues.sort_values(by='Compound').reset_index(drop=True)
+    df_qvalues = df_qvalues.sort_values(by='Compound').reset_index(drop=True)
+
+    # Merge the DataFrames on 'Compound'
+    df_merged = pd.merge(df_pvalues, df_qvalues, on='Compound')
+
+    # Extract p-value and q-value columns
+    p_columns = [col for col in df_pvalues.columns if col != 'Compound']
+    q_columns = [col for col in df_qvalues.columns if col != 'Compound']
+
+    # Create a mapping of comparison names to p and q columns
+    comparison_pairs = {}
+    for p_col in p_columns:
+        comparison_name = p_col.split(' | ')[1]
+        q_col = f'q | {comparison_name}'
+        matching_q_col = next((col for col in q_columns if col.startswith(q_col)), None)
+        if matching_q_col:
+            comparison_pairs[comparison_name] = {
+                'p_col': p_col,
+                'q_col': matching_q_col
+            }
+
+    # Reorder columns to interleave p and q values
+    ordered_columns = ['Compound']
+    for comparison, cols in comparison_pairs.items():
+        ordered_columns.append(cols['p_col'])
+        ordered_columns.append(cols['q_col'])
+
+    df_merged = df_merged[ordered_columns]
+
+    return df_merged
