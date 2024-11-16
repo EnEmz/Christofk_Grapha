@@ -30,28 +30,8 @@ The app automatically detects the presence of isotopologue data based on the "No
 
    _Note_: The `metabolite_classes.csv` is pre-configured for files in `Example Data` folder. Adjust `metabolite_classes.csv` according to the metabolite names in your data file.
 
-### Available Analysis Graphs
+## Documentation
 
-#### Bulk Pool Size Heatmap
-Displays a pool size heatmap of selected metabolite classes and checks statistical significance between each pair among selected sample groups.
-
-#### Bulk Isotopologue Size Heatmap
-Shows a heatmap of summed non-zero isotopologue values. Examines statistical significance between chosen sample groups for summed non-zero isotopologues.
-
-#### Custom Pool Size Heatmap
-Presents a pool size heatmap for a user-entered metabolite list from uploaded metabolite names.
-
-#### Bulk Metabolomics
-Offers a detailed view of isotopologue (if available) and pool metabolomics data. Statistical significance between selected two groups by the user is displayed directly on the metabolite graphs.
-
-#### Isotopologue Distribution
-Displays the isotopologue distribution of a selected metabolite between user-selected sample groups. Statistical significance between selected two groups by the user is displayed directly on the metabolite graphs.
-
-#### Volcano Plot
-Generates a volcano plot comparing user selected control and condition sample groups. On-click annotations are available to display metabolite names.
-
----
-
-Statistical Significance is calculated using [scipy.stats](https://docs.scipy.org/doc/scipy/reference/stats.html) two-sided Student t-test.
+For extensive documentation please visit [Christofk_Grapha Documentation](https://christofklab.com/lab/christofkgrapha/documentation.html#analysis-graphs).
 
 **Version Information**: This is Christofk_Grapha version 1.0, with more updates anticipated. The system has been tested with Python versions 3.8 and 3.12. The provided `requirements.txt` file is tailored for Python 3.12.0.
